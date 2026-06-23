@@ -1,26 +1,38 @@
-from .config import OP_PRODUTIVAS
+import re
+from .config import OP_PRODUTIVAS_COD, OP_PRODUTIVAS_NOMES
+
+_COD_RE = re.compile(r"^\s*(\d{3})")
 
 
 def classificar_operacao(op: str) -> str:
-    op_up = str(op).upper()
+    """
+    Classifica operação em 5 categorias com base em:
+    1) Código numérico de 3 dígitos (ex: '049 - PRODUÇÃO ...')
+    2) Fallback por nome quando não houver código
+    """
+    s  = str(op)
+    su = s.upper()
 
-    # Verificar keywords de manutenção ANTES das de revisão
-    # (evita "REVISÃO MÁQUINA FLEXO" cair em PRODUTIVO)
-    if "PREVENTIVA" in op_up:
+    # Extrai código de 3 dígitos no início (se houver)
+    m   = _COD_RE.match(s)
+    cod = m.group(1) if m else None
+
+    # 1. PRODUTIVO - lista explícita de códigos
+    if cod is not None and cod in OP_PRODUTIVAS_COD:
+        return "01. PRODUTIVO"
+    if any(nome.upper() in su for nome in OP_PRODUTIVAS_NOMES):
+        return "01. PRODUTIVO"
+
+    # 2. MANUTENÇÃO PREVENTIVA
+    if "PREVENTIVA" in su:
         return "02. MANUT. PREVENTIVA"
-    if "CORRETIVA" in op_up:
+
+    # 3. MANUTENÇÃO CORRETIVA
+    if "CORRETIVA" in su:
         return "03. MANUT. CORRETIVA"
-    if "REVISÃO MÁQUINA" in op_up or "REVISAO MAQUINA" in op_up:
-        return "02. MANUT. PREVENTIVA"
 
-    # Produtivo: operações configuradas + revisão manual de produto
-    if any(p.upper() in op_up for p in OP_PRODUTIVAS):
-        return "01. PRODUTIVO"
-    if "REVISAO MANUAL" in op_up or "REVISÃO MANUAL" in op_up:
-        return "01. PRODUTIVO"
-
-    # Setup
-    if "SETUP" in op_up or "AJUSTE DE COR" in op_up or "TROCA DE FACA" in op_up:
+    # 4. SETUP
+    if "SETUP" in su or "AJUSTE DE COR" in su or "TROCA DE FACA" in su:
         return "04. SETUP"
 
     return "05. OUTROS IMPRODUTIVOS"

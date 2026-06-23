@@ -36,16 +36,21 @@ def processar(arquivos_extras: list | None = None):
     historico = ler_historico()
     print(f"  OK  {len(historico)} registros no historico")
 
-    # Garante que historico tem ano/mes (retroativo)
+    # Sempre recategoriza historico (refletir mudancas no classifier)
     if not historico.empty:
-        if "ano" not in historico.columns:
-            import pandas as pd
-            historico["Data de Início"] = pd.to_datetime(historico["Data de Início"], errors="coerce")
-            historico["data_ref"] = historico["Data de Início"].dt.normalize()
-            historico["ano"] = historico["data_ref"].dt.year
-            historico["mes"] = historico["data_ref"].dt.month
-            historico.to_parquet(HISTORICO_PATH, index=False)
-            print("  (adicionadas colunas ano/mes ao historico e salvo)")
+        import pandas as pd
+        from .classifier import classificar_operacao
+        historico["Data de Início"] = pd.to_datetime(historico["Data de Início"], errors="coerce")
+        historico["data_ref"] = historico["Data de Início"].dt.normalize()
+        historico["ano"] = historico["data_ref"].dt.year
+        historico["mes"] = historico["data_ref"].dt.month
+        cats_antes = historico["Categoria"].copy() if "Categoria" in historico.columns else None
+        historico["Categoria"] = historico["Operação"].apply(classificar_operacao)
+        if cats_antes is not None:
+            mudou = (cats_antes != historico["Categoria"]).sum()
+            if mudou > 0:
+                print(f"  Recategorizadas: {mudou} linhas mudaram de categoria")
+        historico.to_parquet(HISTORICO_PATH, index=False)
 
     # [3] Arquivos novos
     print("\n[3/7] Lendo arquivos de entrada...")

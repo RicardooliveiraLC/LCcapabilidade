@@ -11,13 +11,28 @@ DASHBOARD_OUT  = ROOT / "dashboard" / "index.html"
 DOCS_OUT       = ROOT / "docs" / "index.html"
 ROOT_OUT       = ROOT / "index.html"
 
-OP_PRODUTIVAS = [
-    'PRODUÇÃO FLEXOGRÁFICO',
-    'PRODUÇÃO OFFSET',
-    'APLICANDO TRATAMENTO EM MP',
-    'PRODUÇÃO PEÇA',
-    'REFILE MP AVULSO',
-    'IMPRESSÃO INTERNA',
+# Códigos de operações PRODUTIVAS (definidos pelo usuário)
+# 049 - PRODUÇÃO FLEXOGRÁFICO
+# 050 - PRODUÇÃO OFFSET
+# 055 - APLICANDO TRATAMENTO EM MP
+# 056 - PRODUÇÃO OFFSET
+# 078 - REVISÃO MÁQUINA FLEXO
+# 083 - REVISÃO MÁQUINA FLEXO
+# 085 - REVISÃO MÁQUINA FLEXO PC
+# 011 - REVISÃO MANUAL
+OP_PRODUTIVAS_COD = {"049", "050", "055", "056", "078", "083", "085", "011"}
+
+# Fallback por nome (caso a operação venha sem código)
+OP_PRODUTIVAS_NOMES = [
+    "PRODUÇÃO FLEXOGRÁFICO",
+    "PRODUCAO FLEXOGRAFICO",
+    "PRODUÇÃO OFFSET",
+    "PRODUCAO OFFSET",
+    "APLICANDO TRATAMENTO EM MP",
+    "REVISÃO MÁQUINA FLEXO",
+    "REVISAO MAQUINA FLEXO",
+    "REVISÃO MANUAL",
+    "REVISAO MANUAL",
 ]
 
 CATEGORIAS = [
