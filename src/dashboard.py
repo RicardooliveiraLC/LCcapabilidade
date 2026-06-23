@@ -152,7 +152,7 @@ def construir_data(df_hist: pd.DataFrame) -> dict:
 
     # ── config máquinas ────────────────────────────────────────────────────
     mapa_vel = ler_config_maq()
-    config_maq_list = [{"maquina": k.title(), "vel_ref": int(v)} for k, v in mapa_vel.items()]
+    config_maq_list = [{"maquina": k.title(), "vel_ref": int(v)} for k, v in mapa_vel.items() if not pd.isna(v)]
 
     # ── período texto ──────────────────────────────────────────────────────
     anos_meses = df_hist[["ano","mes"]].drop_duplicates().sort_values(["ano","mes"])
