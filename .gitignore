@@ -1,0 +1,18 @@
+# dados sensíveis — não sobem para o GitHub
+dados/entrada/
+dados/processado/
+dados/historico.parquet
+config/config_maq.xlsx
+config/dias_uteis.xlsx
+obsoleto/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+*.egg-info/
+
+# Windows
+Thumbs.db
+desktop.ini
