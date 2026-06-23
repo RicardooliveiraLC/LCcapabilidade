@@ -11,7 +11,7 @@ from pathlib import Path
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 
-from .config import ENTRADA_DIR, PROCESSADO_DIR
+from .config import ENTRADA_DIR, PROCESSADO_DIR, HISTORICO_PATH
 from .loader import listar_arquivos_entrada, ler_apontamentos, ler_config_maq
 from .storage import ler_historico, deduplicar, gravar_historico
 from .transformer import categorizar, agregar, agregar_mensal
@@ -35,6 +35,17 @@ def processar(arquivos_extras: list | None = None):
     print("\n[2/7] Lendo historico...")
     historico = ler_historico()
     print(f"  OK  {len(historico)} registros no historico")
+
+    # Garante que historico tem ano/mes (retroativo)
+    if not historico.empty:
+        if "ano" not in historico.columns:
+            import pandas as pd
+            historico["Data de Início"] = pd.to_datetime(historico["Data de Início"], errors="coerce")
+            historico["data_ref"] = historico["Data de Início"].dt.normalize()
+            historico["ano"] = historico["data_ref"].dt.year
+            historico["mes"] = historico["data_ref"].dt.month
+            historico.to_parquet(HISTORICO_PATH, index=False)
+            print("  (adicionadas colunas ano/mes ao historico e salvo)")
 
     # [3] Arquivos novos
     print("\n[3/7] Lendo arquivos de entrada...")

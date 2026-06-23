@@ -16,10 +16,14 @@ def categorizar(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
     df["Data de Início"] = pd.to_datetime(df["Data de Início"], errors="coerce")
     df = df.dropna(subset=["Data de Início"]).copy()
-    df["data_ref"] = df["Data de Início"].dt.normalize()
-    df["ano"]      = df["data_ref"].dt.year
-    df["mes"]      = df["data_ref"].dt.month
-    df["Categoria"] = df["Operação"].apply(classificar_operacao)
+    if "data_ref" not in df.columns:
+        df["data_ref"] = df["Data de Início"].dt.normalize()
+    if "ano" not in df.columns:
+        df["ano"] = df["data_ref"].dt.year
+    if "mes" not in df.columns:
+        df["mes"] = df["data_ref"].dt.month
+    if "Categoria" not in df.columns:
+        df["Categoria"] = df["Operação"].apply(classificar_operacao)
     return df
 
 
