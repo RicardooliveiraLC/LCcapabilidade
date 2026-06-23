@@ -9,6 +9,7 @@ HISTORICO_PATH = ROOT / "dados" / "historico.parquet"
 TEMPLATE_PATH  = ROOT / "templates" / "dashboard.html.j2"
 DASHBOARD_OUT  = ROOT / "dashboard" / "index.html"
 DOCS_OUT       = ROOT / "docs" / "index.html"
+ROOT_OUT       = ROOT / "index.html"
 
 OP_PRODUTIVAS = [
     'PRODUÇÃO FLEXOGRÁFICO',

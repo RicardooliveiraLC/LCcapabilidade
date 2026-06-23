@@ -35,7 +35,7 @@ start "" "%~dp0dashboard\index.html"
 
 echo.
 echo Sincronizando com GitHub...
-git add docs\index.html
+git add docs\index.html index.html
 if errorlevel 1 (
     echo. [AVISO] Git nao disponivel ou repo nao inicializado.
     echo.

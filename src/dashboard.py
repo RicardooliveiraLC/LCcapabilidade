@@ -8,7 +8,7 @@ import numpy as np
 from pathlib import Path
 from datetime import datetime
 
-from .config import TEMPLATE_PATH, DASHBOARD_OUT, DOCS_OUT, CONFIG_MAQ, DIAS_UTEIS
+from .config import TEMPLATE_PATH, DASHBOARD_OUT, DOCS_OUT, ROOT_OUT, CONFIG_MAQ, DIAS_UTEIS
 from .loader import ler_config_maq, ler_dias_uteis
 
 MESES_PT = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"]
@@ -267,3 +267,6 @@ def gerar_html(data: dict) -> None:
     DOCS_OUT.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(DASHBOARD_OUT, DOCS_OUT)
     print(f"  OK Copiado para docs/: {DOCS_OUT}")
+
+    shutil.copy2(DASHBOARD_OUT, ROOT_OUT)
+    print(f"  OK Copiado para raiz: {ROOT_OUT}")
