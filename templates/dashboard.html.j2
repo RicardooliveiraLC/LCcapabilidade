@@ -647,11 +647,15 @@ function filterMensal(){
   const de=document.getElementById('f-de').value;
   const ate=document.getElementById('f-ate').value;
   const maq=document.getElementById('f-maq').value;
+  // Parse manual (evita bug de timezone com new Date())
+  const parseYM = s => { const [y,m] = s.split('-').map(Number); return y*100+m; };
+  const deYM  = de  ? parseYM(de)  : null;
+  const ateYM = ate ? parseYM(ate) : null;
   return (DATA.mensal||[]).filter(r=>{
     const rYM=r.ano*100+r.mes;
-    if(de){const d=new Date(de);if(rYM<d.getFullYear()*100+(d.getMonth()+1))return false;}
-    if(ate){const d=new Date(ate);if(rYM>d.getFullYear()*100+(d.getMonth()+1))return false;}
-    if(maq&&r.maq!==maq)return false;
+    if(deYM  !== null && rYM < deYM ) return false;
+    if(ateYM !== null && rYM > ateYM) return false;
+    if(maq && r.maq !== maq) return false;
     return true;
   });
 }
