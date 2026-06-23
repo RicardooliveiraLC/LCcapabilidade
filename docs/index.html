@@ -56,6 +56,7 @@ html,body{height:100%;font-family:'Montserrat',-apple-system,Segoe UI,Inter,sans
 .kg.c4{grid-template-columns:repeat(4,1fr)}
 .kg.c3{grid-template-columns:repeat(3,1fr)}
 .kg.c2{grid-template-columns:repeat(2,1fr)}
+.kg.c5{grid-template-columns:repeat(5,1fr)}
 .kc{background:var(--card);border-radius:var(--r);padding:18px 20px;box-shadow:var(--sh)}
 .kc-h{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
 .kc-lb{font-size:10.5px;color:var(--mu);font-weight:600;letter-spacing:.1em;text-transform:uppercase}
@@ -127,7 +128,7 @@ html,body{height:100%;font-family:'Montserrat',-apple-system,Segoe UI,Inter,sans
   .fdate{flex:1;min-width:110px}
   .fsel{flex:1;min-width:130px}
   .content{padding:16px 14px}
-  .kg.c4{grid-template-columns:repeat(2,1fr)}
+  .kg.c4,.kg.c5{grid-template-columns:repeat(2,1fr)}
   .kg.c3{grid-template-columns:repeat(2,1fr)}
   .cg.c2,.cg.c3{grid-template-columns:1fr}
   .cb.h200{height:160px}.cb.h220{height:165px}.cb.h240{height:175px}.cb.h180{height:140px}
@@ -139,7 +140,7 @@ html,body{height:100%;font-family:'Montserrat',-apple-system,Segoe UI,Inter,sans
   .cft{font-size:11.5px}
 }
 @media(max-width:400px){
-  .kg.c4,.kg.c3,.kg.c2{grid-template-columns:1fr}
+  .kg.c4,.kg.c5,.kg.c3,.kg.c2{grid-template-columns:1fr}
   .cmr{grid-template-columns:76px 1fr 38px;gap:8px}
   .kc-v{font-size:22px}
 }
@@ -179,14 +180,18 @@ html,body{height:100%;font-family:'Montserrat',-apple-system,Segoe UI,Inter,sans
       <div class="sub" id="pgSub">jan 2026 – jun 2026 · todas as máquinas</div>
     </div>
     <div class="tp-r">
+      <!-- Filtro Período (De/Até) - mutuamente exclusivo com Filtro Mês -->
       <div class="fgrp">
         <span class="flbl">de</span><input class="fdate" type="date" id="f-de"/>
         <span class="flbl">até</span><input class="fdate" type="date" id="f-ate"/>
       </div>
+      <!-- Novo Filtro de Mês (limpa De/Até automaticamente quando preenchido) -->
+      <select class="fsel" id="f-mes">
+        <option value="">Mês específico…</option>
+      </select>
       <select class="fsel" id="f-maq">
         <option value="">Todas as máquinas</option>
       </select>
-      <button class="bp" id="btn-aplicar">Aplicar</button>
       <button class="bg" id="btn-limpar">Limpar</button>
     </div>
   </div>
@@ -247,13 +252,21 @@ html,body{height:100%;font-family:'Montserrat',-apple-system,Segoe UI,Inter,sans
           <div class="kc-v" id="pr-metros">—</div>
           <div class="kc-d" id="pr-d-metros"></div></div>
       </div>
-      <div class="kg c2">
+      <div class="kg c4">
         <div class="kc"><div class="kc-h"><span class="kc-lb">H. de Setup</span><div class="kc-ic">⚙</div></div>
           <div class="kc-v" id="pr-hrs-setup">—</div>
           <div class="kc-d" id="pr-d-hrs-setup"></div></div>
         <div class="kc"><div class="kc-h"><span class="kc-lb">H. Extras</span><div class="kc-ic">⏲</div></div>
           <div class="kc-v" id="pr-hrs-extra">—</div>
           <div class="kc-d" id="pr-d-hrs-extra"></div></div>
+        <!-- Novo: Horas Disponíveis (dias úteis × jornada) -->
+        <div class="kc"><div class="kc-h"><span class="kc-lb">H. Disp. (dias úteis)</span><div class="kc-ic">📅</div></div>
+          <div class="kc-v" id="pr-hrs-disp">—</div>
+          <div class="kc-d"><span class="ne">—</span><span class="vs">soma jornada do período</span></div></div>
+        <!-- Novo: % Utilização = Horas apontadas / Horas disponíveis -->
+        <div class="kc"><div class="kc-h"><span class="kc-lb">% Utilização Máquinas</span><div class="kc-ic">📊</div></div>
+          <div class="kc-v" id="pr-pct-util">—</div>
+          <div class="kc-d" id="pr-d-pct-util"></div></div>
       </div>
       <div class="cg c2">
         <div class="cc"><div class="ct">Tempo Produtivo por Mês</div><div class="cs">horas produtivas · 6 meses</div>
@@ -271,11 +284,18 @@ html,body{height:100%;font-family:'Montserrat',-apple-system,Segoe UI,Inter,sans
         <div class="cc"><div class="ct">Horas Extras Apontadas</div><div class="cs">por mês · barras escuras ≥ 60h</div>
           <div class="cb h220"><canvas id="pr-extra"></canvas></div></div>
       </div>
+      <!-- Novo gráfico: % Utilização Máquina × Mês (identifica ociosidade) -->
+      <div class="cg c1">
+        <div class="cc"><div class="ct">% Utilização por Máquina × Mês</div>
+          <div class="cs">horas apontadas / horas disponíveis · ajuda a identificar ociosidade ou necessidade de capacidade adicional</div>
+          <div class="cb h240"><canvas id="pr-util"></canvas></div>
+        </div>
+      </div>
     </div>
 
     <!-- ══ PAGE: CAPABILIDADE ══ -->
     <div class="page" id="page-capabilidade">
-      <div class="kg c3">
+      <div class="kg c4">
         <div class="kc"><div class="kc-h"><span class="kc-lb">% Capabilidade Geral</span><div class="kc-ic">▣</div></div>
           <div class="kc-v" id="cp-pct-cap">—</div>
           <div class="kc-d" id="cp-d-pct-cap"></div></div>
@@ -285,6 +305,10 @@ html,body{height:100%;font-family:'Montserrat',-apple-system,Segoe UI,Inter,sans
         <div class="kc"><div class="kc-h"><span class="kc-lb">Cap. Real Utilizada</span><div class="kc-ic">▤</div></div>
           <div class="kc-v" id="cp-cap-util">—</div>
           <div class="kc-d" id="cp-d-cap-util"></div></div>
+        <!-- Novo: Velocidade Média Efetiva = Metros / Tempo apontado -->
+        <div class="kc"><div class="kc-h"><span class="kc-lb">Vel. Média Efetiva</span><div class="kc-ic">⚡</div></div>
+          <div class="kc-v" id="cp-vel-ef">—</div>
+          <div class="kc-d"><span class="ne">—</span><span class="vs">metros / h. apontada</span></div></div>
       </div>
       <div class="cg c2">
         <div class="cc"><div class="ct">% Capabilidade por Mês</div><div class="cs">evolução mensal · 6 meses</div>
@@ -313,6 +337,21 @@ html,body{height:100%;font-family:'Montserrat',-apple-system,Segoe UI,Inter,sans
           <div class="kc-v" id="mn-pct-manut">—</div>
           <div class="kc-d"><span class="ne">—</span><span class="vs">prev + corr / h. disponíveis</span></div></div>
       </div>
+      <!-- Novos indicadores: MTBF, MTTR e Tempo Disponível sem Manutenção -->
+      <div class="kg c3">
+        <!-- MTBF (Mean Time Between Failures) = H. produtivas / nº de eventos corretivos -->
+        <div class="kc"><div class="kc-h"><span class="kc-lb">MTBF</span><div class="kc-ic">⏳</div></div>
+          <div class="kc-v" id="mn-mtbf">—</div>
+          <div class="kc-d"><span class="ne">—</span><span class="vs">tempo médio entre falhas</span></div></div>
+        <!-- MTTR (Mean Time To Repair) = H. corretiva / nº de eventos corretivos -->
+        <div class="kc"><div class="kc-h"><span class="kc-lb">MTTR</span><div class="kc-ic">🛠</div></div>
+          <div class="kc-v" id="mn-mttr">—</div>
+          <div class="kc-d"><span class="ne">—</span><span class="vs">tempo médio de reparo</span></div></div>
+        <!-- Tempo disponível sem manutenção = H. Disp - Prev - Corr -->
+        <div class="kc"><div class="kc-h"><span class="kc-lb">H. Disp. sem Manut.</span><div class="kc-ic">✓</div></div>
+          <div class="kc-v" id="mn-hrs-sem">—</div>
+          <div class="kc-d" id="mn-d-pct-disp"></div></div>
+      </div>
       <div class="cg c2">
         <div class="cc"><div class="ct">Manutenção Preventiva por Mês</div><div class="cs">horas · 6 meses</div>
           <div class="cb h220"><canvas id="mn-prev"></canvas></div></div>
@@ -325,6 +364,15 @@ html,body{height:100%;font-family:'Montserrat',-apple-system,Segoe UI,Inter,sans
           <div class="cs">preventiva, corretiva e total como % das horas disponíveis · 6 meses</div>
           <div class="cb h220"><canvas id="mn-pct"></canvas></div>
         </div>
+      </div>
+      <!-- Novos gráficos: disponibilidade em % e em horas -->
+      <div class="cg c2">
+        <div class="cc"><div class="ct">% Disponibilidade da Máquina</div>
+          <div class="cs">(H. Disp − Prev − Corr) / H. Disp · por mês</div>
+          <div class="cb h220"><canvas id="mn-disp-pct"></canvas></div></div>
+        <div class="cc"><div class="ct">Horas Disponíveis sem Manutenção</div>
+          <div class="cs">horas absolutas livres de manutenção · por mês</div>
+          <div class="cb h220"><canvas id="mn-disp-h"></canvas></div></div>
       </div>
     </div>
 
@@ -366,17 +414,13 @@ html,body{height:100%;font-family:'Montserrat',-apple-system,Segoe UI,Inter,sans
 
 <script>
 /* DATA - substituído pelo Python */
-const DATA = {"periodo": "Jan 26 – Mai 26", "dias_uteis_periodo": 1730, "atualizado_em": "23/06/2026 12:33", "kpis": {"pct_produtivo": 57.68, "d_pct_produtivo": -0.44, "pct_cap": 107.53, "d_pct_cap": 14.95, "hrs_prod": 7999.27, "d_hrs_prod": 75.45, "hrs_improd": 5868.68, "d_hrs_improd": 4796.82, "cap_total_m": 5411079, "cap_util_m": 5818487, "d_cap_util_pct": 16.16, "pct_setup": 15.18, "d_pct_setup": -2.96, "hrs_extra": 2629.97, "d_hrs_extra": 75.37, "hrs_prev": 19.0, "d_hrs_prev": -1.12, "hrs_corr": 83.38, "d_hrs_corr": -13.25, "hrs_setup": 2105.83, "d_hrs_setup": -58.18, "pct_manut": 0.67, "metros_prod": 5818487, "d_metros_pct": 16.16}, "series": {"labels": ["Jan 26", "Fev 26", "Mar 26", "Abr 26", "Mai 26"], "pct_cap": [108.03, 94.97, 104.77, 107.77, 122.72], "hrs_prod": [1640.48, 1548.57, 1644.13, 1545.32, 1620.77], "hrs_disp": [2735.0, 2916.0, 3375.0, 3034.0, 3169.0], "hrs_apont": [2855.0, 2762.18, 2868.23, 2617.18, 2765.35], "hrs_prev": [4.13, 10.13, 1.25, 2.3, 1.18], "hrs_corr": [9.28, 19.73, 20.62, 23.5, 10.25], "hrs_setup": [418.7, 466.85, 439.5, 419.48, 361.3], "hrs_extra": [775.72, 630.48, 399.7, 374.35, 449.72], "pct_prev": [0.15, 0.35, 0.04, 0.08, 0.04], "pct_corr": [0.34, 0.68, 0.61, 0.77, 0.32], "pct_manut": [0.49, 1.02, 0.65, 0.85, 0.36]}, "por_maquina": [{"nm": "ETIRAMA WINE", "vel": 8, "h": 591.78, "cap_tot": 295879, "cap_real": 286918, "pct_cap": 97}, {"nm": "TROQUELADORA", "vel": 25, "h": 1061.82, "cap_tot": 1592725, "cap_real": 1091003, "pct_cap": 68}, {"nm": "ETIRAMA ONE", "vel": 10, "h": 1168.25, "cap_tot": 700950, "cap_real": 458486, "pct_cap": 65}, {"nm": "BROTECH CDF330", "vel": 10, "h": 1126.47, "cap_tot": 675880, "cap_real": 390607, "pct_cap": 58}, {"nm": "ETIRAMA FIT", "vel": 10, "h": 1073.03, "cap_tot": 643820, "cap_real": 346111, "pct_cap": 54}, {"nm": "DURST", "vel": 25, "h": 1001.2, "cap_tot": 1501800, "cap_real": 397286, "pct_cap": 26}, {"nm": "APLICAÇÃO MANUAL", "vel": 0, "h": 0.08, "cap_tot": 0, "cap_real": 364, "pct_cap": 0}, {"nm": "BATIDA", "vel": 0, "h": 1011.47, "cap_tot": 0, "cap_real": 261953, "pct_cap": 0}, {"nm": "CORTE E VINCO", "vel": 0, "h": 22.83, "cap_tot": 0, "cap_real": 13203, "pct_cap": 0}, {"nm": "DOBRADEIRA", "vel": 0, "h": 1004.68, "cap_tot": 0, "cap_real": 86985, "pct_cap": 0}, {"nm": "DURST - AGUARDANDO PCP", "vel": 25, "h": 0.02, "cap_tot": 25, "cap_real": 0, "pct_cap": 0}, {"nm": "EMBALAGEM FINAL", "vel": 0, "h": 462.02, "cap_tot": 0, "cap_real": 1323220, "pct_cap": 0}, {"nm": "FECHAMENTO DE KIT", "vel": 0, "h": 19.88, "cap_tot": 0, "cap_real": 2535, "pct_cap": 0}, {"nm": "FINALIZAÇÃO DE OP (GERENTE)", "vel": 0, "h": 89.73, "cap_tot": 0, "cap_real": 52188, "pct_cap": 0}, {"nm": "GRAMPEADEIRA", "vel": 0, "h": 42.83, "cap_tot": 0, "cap_real": 0, "pct_cap": 0}, {"nm": "GUILHOTINA", "vel": 0, "h": 1003.83, "cap_tot": 0, "cap_real": 29025, "pct_cap": 0}, {"nm": "MESA DE REVISÃO 1", "vel": 0, "h": 132.2, "cap_tot": 0, "cap_real": 100119, "pct_cap": 0}, {"nm": "MESA DE REVISÃO 2", "vel": 0, "h": 6.0, "cap_tot": 0, "cap_real": 0, "pct_cap": 0}, {"nm": "OFFSET - SPEEDMASTER", "vel": 0, "h": 812.82, "cap_tot": 0, "cap_real": 750, "pct_cap": 0}, {"nm": "PLOTTER VD330", "vel": 0, "h": 538.88, "cap_tot": 0, "cap_real": 39102, "pct_cap": 0}, {"nm": "REBOBINADEIRA ECO", "vel": 0, "h": 1039.5, "cap_tot": 0, "cap_real": 411836, "pct_cap": 0}, {"nm": "REVISORA VRR STD 350", "vel": 0, "h": 1070.93, "cap_tot": 0, "cap_real": 413388, "pct_cap": 0}, {"nm": "REVISÃO DIGITAL", "vel": 0, "h": 4.63, "cap_tot": 0, "cap_real": 632, "pct_cap": 0}, {"nm": "REVISÃO GERAL", "vel": 0, "h": 59.15, "cap_tot": 0, "cap_real": 99566, "pct_cap": 0}, {"nm": "REVISÃO MANUAL", "vel": 0, "h": 453.22, "cap_tot": 0, "cap_real": 8899, "pct_cap": 0}, {"nm": "SELAGEM MANUAL", "vel": 0, "h": 9.0, "cap_tot": 0, "cap_real": 2000, "pct_cap": 0}, {"nm": "TERCEIROS", "vel": 0, "h": 46.98, "cap_tot": 0, "cap_real": 912, "pct_cap": 0}, {"nm": "ZEBRA - TÉRMICA", "vel": 0, "h": 14.7, "cap_tot": 0, "cap_real": 1390, "pct_cap": 0}], "dias_uteis": [{"m": "Jan", "d": 21, "obs": "01/01 Confraternizacao"}, {"m": "Fev", "d": 18, "obs": "Carnaval 16-17/02"}, {"m": "Mar", "d": 22, "obs": "21/03 Aniv. Vinhedo (sab.)"}, {"m": "Abr", "d": 20, "obs": "03/04 Sexta Santa 21/04 Tiradentes"}, {"m": "Mai", "d": 20, "obs": "01/05 Dia do Trabalho"}, {"m": "Jun", "d": 21, "obs": "04/06 Corpus Christi"}, {"m": "Jul", "d": 22, "obs": "09/07 Revolucao SP"}, {"m": "Ago", "d": 21, "obs": "—"}, {"m": "Set", "d": 21, "obs": "07/09 Independencia"}, {"m": "Out", "d": 21, "obs": "12/10 N. Sra. Aparecida"}, {"m": "Nov", "d": 19, "obs": "02/11 Finados 20/11 Consciencia Negra"}, {"m": "Dez", "d": 22, "obs": "25/12 Natal"}], "config_maq": [{"maquina": "Etirama Fit", "vel_ref": 10}, {"maquina": "Etirama One", "vel_ref": 10}, {"maquina": "Etirama Wine", "vel_ref": 8}, {"maquina": "Offset - Speedmaster", "vel_ref": 0}, {"maquina": "Revisora Vrr Std 350", "vel_ref": 0}, {"maquina": "Guilhotina", "vel_ref": 0}, {"maquina": "Brotech Cdf330", "vel_ref": 10}, {"maquina": "Plotter Vd330", "vel_ref": 0}, {"maquina": "Durst", "vel_ref": 25}, {"maquina": "Troqueladora", "vel_ref": 25}], "mensal": [{"ano": 2026, "mes": 1, "maq": "BATIDA", "prod": 134.45, "prev": 0.0, "corr": 0.52, "setup": 54.12, "outros": 47.08, "disp": 167.0, "apont": 236.17, "extra": 73.83, "metros": 60265.04, "cap_tot": 0.0}, {"ano": 2026, "mes": 1, "maq": "BROTECH CDF330", "prod": 159.77, "prev": 0.0, "corr": 2.77, "setup": 24.55, "outros": 44.4, "disp": 167.0, "apont": 231.48, "extra": 65.6, "metros": 76719.02, "cap_tot": 138890.0}, {"ano": 2026, "mes": 1, "maq": "CORTE E VINCO", "prod": 16.63, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 34.0, "apont": 16.63, "extra": 0.0, "metros": 5126.43, "cap_tot": 0.0}, {"ano": 2026, "mes": 1, "maq": "DOBRADEIRA", "prod": 152.45, "prev": 0.0, "corr": 0.0, "setup": 21.22, "outros": 13.0, "disp": 158.0, "apont": 186.67, "extra": 50.07, "metros": 99.07, "cap_tot": 0.0}, {"ano": 2026, "mes": 1, "maq": "DURST", "prod": 54.62, "prev": 0.0, "corr": 1.25, "setup": 69.83, "outros": 53.68, "disp": 149.0, "apont": 179.38, "extra": 55.93, "metros": 71194.02, "cap_tot": 269075.0}, {"ano": 2026, "mes": 1, "maq": "EMBALAGEM FINAL", "prod": 1.33, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 63.27, "disp": 167.0, "apont": 64.6, "extra": 5.95, "metros": 251035.38, "cap_tot": 0.0}, {"ano": 2026, "mes": 1, "maq": "ETIRAMA FIT", "prod": 103.83, "prev": 0.0, "corr": 0.0, "setup": 50.58, "outros": 63.47, "disp": 167.0, "apont": 217.88, "extra": 55.58, "metros": 92185.5, "cap_tot": 130730.0}, {"ano": 2026, "mes": 1, "maq": "ETIRAMA ONE", "prod": 75.72, "prev": 1.3, "corr": 0.0, "setup": 79.98, "outros": 104.0, "disp": 167.0, "apont": 261.0, "extra": 106.62, "metros": 94999.01, "cap_tot": 156600.0}, {"ano": 2026, "mes": 1, "maq": "ETIRAMA WINE", "prod": 121.08, "prev": 0.0, "corr": 0.0, "setup": 19.03, "outros": 53.05, "disp": 141.0, "apont": 193.17, "extra": 78.67, "metros": 91385.0, "cap_tot": 96579.47}, {"ano": 2026, "mes": 1, "maq": "FECHAMENTO DE KIT", "prod": 0.0, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 7.82, "disp": 18.0, "apont": 7.82, "extra": 0.0, "metros": 139.7, "cap_tot": 0.0}, {"ano": 2026, "mes": 1, "maq": "FINALIZAÇÃO DE OP (GERENTE)", "prod": 16.17, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 9.82, "disp": 106.0, "apont": 25.98, "extra": 0.77, "metros": 26703.58, "cap_tot": 0.0}, {"ano": 2026, "mes": 1, "maq": "GRAMPEADEIRA", "prod": 1.5, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 9.0, "apont": 1.5, "extra": 0.0, "metros": 0.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 1, "maq": "GUILHOTINA", "prod": 71.68, "prev": 0.0, "corr": 0.0, "setup": 7.1, "outros": 118.27, "disp": 158.0, "apont": 197.05, "extra": 47.62, "metros": 0.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 1, "maq": "MESA DE REVISÃO 1", "prod": 9.43, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.42, "disp": 88.0, "apont": 9.85, "extra": 0.0, "metros": 6304.38, "cap_tot": 0.0}, {"ano": 2026, "mes": 1, "maq": "MESA DE REVISÃO 2", "prod": 3.0, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 9.0, "apont": 3.0, "extra": 0.0, "metros": 0.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 1, "maq": "OFFSET - SPEEDMASTER", "prod": 89.03, "prev": 2.83, "corr": 2.0, "setup": 27.23, "outros": 40.72, "disp": 141.0, "apont": 161.82, "extra": 33.02, "metros": 270.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 1, "maq": "PLOTTER VD330", "prod": 69.97, "prev": 0.0, "corr": 0.0, "setup": 18.37, "outros": 20.2, "disp": 142.0, "apont": 108.53, "extra": 25.57, "metros": 8317.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 1, "maq": "REBOBINADEIRA ECO", "prod": 166.53, "prev": 0.0, "corr": 0.0, "setup": 11.25, "outros": 20.78, "disp": 141.0, "apont": 198.57, "extra": 60.37, "metros": 94105.94, "cap_tot": 0.0}, {"ano": 2026, "mes": 1, "maq": "REVISORA VRR STD 350", "prod": 170.13, "prev": 0.0, "corr": 2.75, "setup": 22.37, "outros": 21.4, "disp": 167.0, "apont": 216.65, "extra": 58.08, "metros": 95124.39, "cap_tot": 0.0}, {"ano": 2026, "mes": 1, "maq": "REVISÃO GERAL", "prod": 4.45, "prev": 0.0, "corr": 0.0, "setup": 0.17, "outros": 11.4, "disp": 86.0, "apont": 16.02, "extra": 0.02, "metros": 61196.16, "cap_tot": 0.0}, {"ano": 2026, "mes": 1, "maq": "REVISÃO MANUAL", "prod": 82.8, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 19.5, "disp": 150.0, "apont": 102.3, "extra": 11.53, "metros": 0.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 1, "maq": "TERCEIROS", "prod": 5.43, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 36.0, "apont": 5.43, "extra": 0.0, "metros": 0.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 1, "maq": "TROQUELADORA", "prod": 130.47, "prev": 0.0, "corr": 0.0, "setup": 12.9, "outros": 70.13, "disp": 167.0, "apont": 213.5, "extra": 46.5, "metros": 166268.43, "cap_tot": 320250.0}, {"ano": 2026, "mes": 2, "maq": "BATIDA", "prod": 136.15, "prev": 3.63, "corr": 0.0, "setup": 59.75, "outros": 26.68, "disp": 158.0, "apont": 226.22, "extra": 69.8, "metros": 62597.02, "cap_tot": 0.0}, {"ano": 2026, "mes": 2, "maq": "BROTECH CDF330", "prod": 138.15, "prev": 0.0, "corr": 1.02, "setup": 26.15, "outros": 40.73, "disp": 158.0, "apont": 206.05, "extra": 48.05, "metros": 75541.0, "cap_tot": 123630.0}, {"ano": 2026, "mes": 2, "maq": "CORTE E VINCO", "prod": 3.68, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 52.0, "apont": 3.68, "extra": 0.0, "metros": 3459.31, "cap_tot": 0.0}, {"ano": 2026, "mes": 2, "maq": "DOBRADEIRA", "prod": 150.07, "prev": 0.0, "corr": 0.0, "setup": 25.25, "outros": 17.0, "disp": 158.0, "apont": 192.32, "extra": 40.87, "metros": 200.23, "cap_tot": 0.0}, {"ano": 2026, "mes": 2, "maq": "DURST", "prod": 55.57, "prev": 6.5, "corr": 11.97, "setup": 89.38, "outros": 57.85, "disp": 158.0, "apont": 221.27, "extra": 69.28, "metros": 79575.01, "cap_tot": 331900.0}, {"ano": 2026, "mes": 2, "maq": "EMBALAGEM FINAL", "prod": 0.67, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 94.02, "disp": 158.0, "apont": 94.68, "extra": 10.02, "metros": 265032.21, "cap_tot": 0.0}, {"ano": 2026, "mes": 2, "maq": "ETIRAMA FIT", "prod": 41.97, "prev": 0.0, "corr": 0.0, "setup": 87.62, "outros": 66.0, "disp": 158.0, "apont": 195.58, "extra": 37.58, "metros": 37589.1, "cap_tot": 117350.0}, {"ano": 2026, "mes": 2, "maq": "ETIRAMA ONE", "prod": 44.65, "prev": 0.0, "corr": 1.17, "setup": 70.48, "outros": 126.05, "disp": 158.0, "apont": 242.35, "extra": 92.32, "metros": 50348.0, "cap_tot": 145410.0}, {"ano": 2026, "mes": 2, "maq": "ETIRAMA WINE", "prod": 64.25, "prev": 0.0, "corr": 0.0, "setup": 7.9, "outros": 17.02, "disp": 115.0, "apont": 89.17, "extra": 9.42, "metros": 55313.13, "cap_tot": 44581.55}, {"ano": 2026, "mes": 2, "maq": "FECHAMENTO DE KIT", "prod": 0.0, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.82, "disp": 53.0, "apont": 0.82, "extra": 0.0, "metros": 154.25, "cap_tot": 0.0}, {"ano": 2026, "mes": 2, "maq": "FINALIZAÇÃO DE OP (GERENTE)", "prod": 13.08, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 9.48, "disp": 124.0, "apont": 22.57, "extra": 0.0, "metros": 8997.79, "cap_tot": 0.0}, {"ano": 2026, "mes": 2, "maq": "GRAMPEADEIRA", "prod": 2.35, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 17.0, "apont": 2.35, "extra": 0.0, "metros": 0.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 2, "maq": "GUILHOTINA", "prod": 83.78, "prev": 0.0, "corr": 0.0, "setup": 8.05, "outros": 98.97, "disp": 158.0, "apont": 190.8, "extra": 35.48, "metros": 7680.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 2, "maq": "MESA DE REVISÃO 1", "prod": 3.68, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 20.68, "disp": 131.0, "apont": 24.37, "extra": 1.02, "metros": 3326.16, "cap_tot": 0.0}, {"ano": 2026, "mes": 2, "maq": "MESA DE REVISÃO 2", "prod": 3.0, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 9.0, "apont": 3.0, "extra": 0.0, "metros": 0.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 2, "maq": "OFFSET - SPEEDMASTER", "prod": 104.6, "prev": 0.0, "corr": 3.1, "setup": 20.53, "outros": 23.5, "disp": 150.0, "apont": 151.73, "extra": 9.25, "metros": 70.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 2, "maq": "PLOTTER VD330", "prod": 101.03, "prev": 0.0, "corr": 0.0, "setup": 15.02, "outros": 15.22, "disp": 140.0, "apont": 131.27, "extra": 21.47, "metros": 10418.48, "cap_tot": 0.0}, {"ano": 2026, "mes": 2, "maq": "REBOBINADEIRA ECO", "prod": 177.33, "prev": 0.0, "corr": 0.0, "setup": 17.45, "outros": 19.57, "disp": 158.0, "apont": 214.35, "extra": 56.5, "metros": 93213.52, "cap_tot": 0.0}, {"ano": 2026, "mes": 2, "maq": "REVISORA VRR STD 350", "prod": 168.75, "prev": 0.0, "corr": 2.48, "setup": 23.6, "outros": 11.65, "disp": 158.0, "apont": 206.48, "extra": 48.48, "metros": 75682.5, "cap_tot": 0.0}, {"ano": 2026, "mes": 2, "maq": "REVISÃO GERAL", "prod": 17.93, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 3.27, "disp": 123.0, "apont": 21.2, "extra": 1.0, "metros": 21285.75, "cap_tot": 0.0}, {"ano": 2026, "mes": 2, "maq": "REVISÃO MANUAL", "prod": 83.7, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 6.8, "disp": 149.0, "apont": 90.5, "extra": 18.28, "metros": 0.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 2, "maq": "TERCEIROS", "prod": 10.45, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 54.0, "apont": 10.45, "extra": 0.0, "metros": 7.9, "cap_tot": 0.0}, {"ano": 2026, "mes": 2, "maq": "TROQUELADORA", "prod": 141.27, "prev": 0.0, "corr": 0.0, "setup": 15.5, "outros": 61.58, "disp": 158.0, "apont": 218.35, "extra": 61.67, "metros": 183935.72, "cap_tot": 327525.0}, {"ano": 2026, "mes": 2, "maq": "ZEBRA - TÉRMICA", "prod": 2.45, "prev": 0.0, "corr": 0.0, "setup": 0.17, "outros": 0.02, "disp": 61.0, "apont": 2.63, "extra": 0.0, "metros": 1099.99, "cap_tot": 0.0}, {"ano": 2026, "mes": 3, "maq": "BATIDA", "prod": 118.7, "prev": 0.33, "corr": 0.0, "setup": 46.8, "outros": 40.15, "disp": 194.0, "apont": 205.98, "extra": 21.63, "metros": 49515.01, "cap_tot": 0.0}, {"ano": 2026, "mes": 3, "maq": "BROTECH CDF330", "prod": 156.12, "prev": 0.0, "corr": 0.68, "setup": 31.67, "outros": 34.43, "disp": 194.0, "apont": 222.9, "extra": 28.9, "metros": 82465.0, "cap_tot": 133740.0}, {"ano": 2026, "mes": 3, "maq": "CORTE E VINCO", "prod": 0.43, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 17.0, "apont": 0.43, "extra": 0.02, "metros": 1995.03, "cap_tot": 0.0}, {"ano": 2026, "mes": 3, "maq": "DOBRADEIRA", "prod": 180.55, "prev": 0.0, "corr": 0.0, "setup": 18.02, "outros": 17.0, "disp": 186.0, "apont": 215.57, "extra": 46.25, "metros": 39793.57, "cap_tot": 0.0}, {"ano": 2026, "mes": 3, "maq": "DURST", "prod": 51.77, "prev": 0.0, "corr": 2.82, "setup": 102.35, "outros": 64.95, "disp": 194.0, "apont": 221.88, "extra": 33.12, "metros": 82766.02, "cap_tot": 332825.0}, {"ano": 2026, "mes": 3, "maq": "DURST - AGUARDANDO PCP", "prod": 0.02, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 8.0, "apont": 0.02, "extra": 0.0, "metros": 0.01, "cap_tot": 25.0}, {"ano": 2026, "mes": 3, "maq": "EMBALAGEM FINAL", "prod": 0.17, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 106.3, "disp": 194.0, "apont": 106.47, "extra": 0.22, "metros": 258198.26, "cap_tot": 0.0}, {"ano": 2026, "mes": 3, "maq": "ETIRAMA FIT", "prod": 82.92, "prev": 0.0, "corr": 11.55, "setup": 61.47, "outros": 76.13, "disp": 194.0, "apont": 232.07, "extra": 38.07, "metros": 73150.0, "cap_tot": 139240.0}, {"ano": 2026, "mes": 3, "maq": "ETIRAMA ONE", "prod": 99.47, "prev": 0.0, "corr": 1.65, "setup": 71.35, "outros": 65.72, "disp": 194.0, "apont": 238.18, "extra": 46.15, "metros": 78522.0, "cap_tot": 142910.0}, {"ano": 2026, "mes": 3, "maq": "ETIRAMA WINE", "prod": 68.12, "prev": 0.0, "corr": 0.0, "setup": 18.22, "outros": 22.28, "disp": 134.0, "apont": 108.62, "extra": 5.35, "metros": 52318.02, "cap_tot": 54306.16}, {"ano": 2026, "mes": 3, "maq": "FECHAMENTO DE KIT", "prod": 0.0, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 1.72, "disp": 54.0, "apont": 1.72, "extra": 0.0, "metros": 1575.09, "cap_tot": 0.0}, {"ano": 2026, "mes": 3, "maq": "FINALIZAÇÃO DE OP (GERENTE)", "prod": 7.38, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 3.47, "disp": 168.0, "apont": 10.85, "extra": 1.2, "metros": 12198.3, "cap_tot": 0.0}, {"ano": 2026, "mes": 3, "maq": "GRAMPEADEIRA", "prod": 25.0, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 9.0, "apont": 25.0, "extra": 16.0, "metros": 0.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 3, "maq": "GUILHOTINA", "prod": 92.73, "prev": 0.0, "corr": 0.0, "setup": 8.7, "outros": 114.12, "disp": 194.0, "apont": 215.55, "extra": 24.98, "metros": 9275.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 3, "maq": "MESA DE REVISÃO 1", "prod": 7.55, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 20.18, "disp": 160.0, "apont": 27.73, "extra": 6.37, "metros": 19836.67, "cap_tot": 0.0}, {"ano": 2026, "mes": 3, "maq": "OFFSET - SPEEDMASTER", "prod": 123.72, "prev": 0.0, "corr": 0.0, "setup": 21.3, "outros": 26.52, "disp": 168.0, "apont": 171.53, "extra": 22.75, "metros": 100.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 3, "maq": "PLOTTER VD330", "prod": 81.33, "prev": 0.0, "corr": 0.0, "setup": 9.7, "outros": 21.12, "disp": 185.0, "apont": 112.15, "extra": 8.82, "metros": 7458.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 3, "maq": "REBOBINADEIRA ECO", "prod": 156.63, "prev": 0.0, "corr": 0.0, "setup": 13.63, "outros": 24.43, "disp": 194.0, "apont": 194.7, "extra": 17.75, "metros": 70141.33, "cap_tot": 0.0}, {"ano": 2026, "mes": 3, "maq": "REVISORA VRR STD 350", "prod": 162.52, "prev": 0.0, "corr": 3.27, "setup": 24.4, "outros": 32.98, "disp": 194.0, "apont": 223.17, "extra": 29.17, "metros": 72773.75, "cap_tot": 0.0}, {"ano": 2026, "mes": 3, "maq": "REVISÃO DIGITAL", "prod": 0.0, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 4.63, "disp": 9.0, "apont": 4.63, "extra": 0.0, "metros": 632.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 3, "maq": "REVISÃO GERAL", "prod": 2.72, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 7.23, "disp": 97.0, "apont": 9.95, "extra": 1.02, "metros": 12006.87, "cap_tot": 0.0}, {"ano": 2026, "mes": 3, "maq": "REVISÃO MANUAL", "prod": 101.38, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.62, "disp": 151.0, "apont": 102.0, "extra": 31.58, "metros": 4293.32, "cap_tot": 0.0}, {"ano": 2026, "mes": 3, "maq": "TERCEIROS", "prod": 1.88, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 63.0, "apont": 1.88, "extra": 0.0, "metros": 8.29, "cap_tot": 0.0}, {"ano": 2026, "mes": 3, "maq": "TROQUELADORA", "prod": 122.0, "prev": 0.92, "corr": 0.65, "setup": 11.9, "outros": 78.75, "disp": 194.0, "apont": 214.22, "extra": 20.37, "metros": 248729.0, "cap_tot": 321325.0}, {"ano": 2026, "mes": 3, "maq": "ZEBRA - TÉRMICA", "prod": 1.03, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 26.0, "apont": 1.03, "extra": 0.0, "metros": 279.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 4, "maq": "BATIDA", "prod": 103.52, "prev": 0.0, "corr": 0.0, "setup": 39.22, "outros": 27.07, "disp": 177.0, "apont": 169.8, "extra": 12.25, "metros": 46857.34, "cap_tot": 0.0}, {"ano": 2026, "mes": 4, "maq": "BROTECH CDF330", "prod": 168.72, "prev": 0.0, "corr": 16.12, "setup": 24.95, "outros": 30.5, "disp": 177.0, "apont": 240.28, "extra": 63.28, "metros": 82139.0, "cap_tot": 144170.0}, {"ano": 2026, "mes": 4, "maq": "CORTE E VINCO", "prod": 0.07, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 34.0, "apont": 0.07, "extra": 0.0, "metros": 1.55, "cap_tot": 0.0}, {"ano": 2026, "mes": 4, "maq": "DOBRADEIRA", "prod": 162.28, "prev": 0.0, "corr": 0.0, "setup": 13.18, "outros": 16.9, "disp": 168.0, "apont": 192.37, "extra": 29.55, "metros": 19701.46, "cap_tot": 0.0}, {"ano": 2026, "mes": 4, "maq": "DURST", "prod": 27.8, "prev": 2.3, "corr": 0.0, "setup": 92.72, "outros": 60.12, "disp": 168.0, "apont": 182.93, "extra": 23.75, "metros": 85825.01, "cap_tot": 274400.0}, {"ano": 2026, "mes": 4, "maq": "EMBALAGEM FINAL", "prod": 4.98, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 82.77, "disp": 177.0, "apont": 87.75, "extra": 1.47, "metros": 282641.3, "cap_tot": 0.0}, {"ano": 2026, "mes": 4, "maq": "ETIRAMA FIT", "prod": 58.37, "prev": 0.0, "corr": 4.55, "setup": 76.55, "outros": 61.7, "disp": 177.0, "apont": 201.17, "extra": 24.18, "metros": 57299.0, "cap_tot": 120700.0}, {"ano": 2026, "mes": 4, "maq": "ETIRAMA ONE", "prod": 86.83, "prev": 0.0, "corr": 0.0, "setup": 60.02, "outros": 55.72, "disp": 177.0, "apont": 202.57, "extra": 25.57, "metros": 121375.0, "cap_tot": 121540.0}, {"ano": 2026, "mes": 4, "maq": "ETIRAMA WINE", "prod": 56.28, "prev": 0.0, "corr": 0.0, "setup": 24.23, "outros": 43.27, "disp": 132.0, "apont": 123.78, "extra": 13.8, "metros": 51951.0, "cap_tot": 61889.19}, {"ano": 2026, "mes": 4, "maq": "FECHAMENTO DE KIT", "prod": 0.0, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 3.25, "disp": 45.0, "apont": 3.25, "extra": 0.0, "metros": 527.05, "cap_tot": 0.0}, {"ano": 2026, "mes": 4, "maq": "FINALIZAÇÃO DE OP (GERENTE)", "prod": 5.9, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.03, "disp": 150.0, "apont": 5.93, "extra": 1.35, "metros": 3261.67, "cap_tot": 0.0}, {"ano": 2026, "mes": 4, "maq": "GRAMPEADEIRA", "prod": 7.7, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 9.0, "apont": 7.7, "extra": 3.7, "metros": 0.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 4, "maq": "GUILHOTINA", "prod": 99.07, "prev": 0.0, "corr": 0.0, "setup": 11.42, "outros": 93.2, "disp": 177.0, "apont": 203.68, "extra": 28.15, "metros": 7570.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 4, "maq": "MESA DE REVISÃO 1", "prod": 15.38, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 3.22, "disp": 141.0, "apont": 18.6, "extra": 2.0, "metros": 43498.86, "cap_tot": 0.0}, {"ano": 2026, "mes": 4, "maq": "OFFSET - SPEEDMASTER", "prod": 118.88, "prev": 0.0, "corr": 1.5, "setup": 29.9, "outros": 32.9, "disp": 168.0, "apont": 183.18, "extra": 24.47, "metros": 300.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 4, "maq": "PLOTTER VD330", "prod": 71.0, "prev": 0.0, "corr": 0.0, "setup": 2.97, "outros": 5.57, "disp": 160.0, "apont": 79.53, "extra": 11.42, "metros": 4535.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 4, "maq": "REBOBINADEIRA ECO", "prod": 168.65, "prev": 0.0, "corr": 0.0, "setup": 11.5, "outros": 27.37, "disp": 177.0, "apont": 207.52, "extra": 38.25, "metros": 67000.31, "cap_tot": 0.0}, {"ano": 2026, "mes": 4, "maq": "REVISORA VRR STD 350", "prod": 167.37, "prev": 0.0, "corr": 0.0, "setup": 21.63, "outros": 17.55, "disp": 177.0, "apont": 206.55, "extra": 31.2, "metros": 97065.15, "cap_tot": 0.0}, {"ano": 2026, "mes": 4, "maq": "REVISÃO GERAL", "prod": 0.1, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 1.42, "disp": 80.0, "apont": 1.52, "extra": 0.0, "metros": 1592.08, "cap_tot": 0.0}, {"ano": 2026, "mes": 4, "maq": "REVISÃO MANUAL", "prod": 84.58, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 159.0, "apont": 84.58, "extra": 10.97, "metros": 2100.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 4, "maq": "TERCEIROS", "prod": 8.42, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 27.0, "apont": 8.42, "extra": 0.0, "metros": 0.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 4, "maq": "TROQUELADORA", "prod": 129.42, "prev": 0.0, "corr": 1.33, "setup": 11.2, "outros": 64.05, "disp": 177.0, "apont": 206.0, "extra": 29.0, "metros": 136654.87, "cap_tot": 309000.0}, {"ano": 2026, "mes": 5, "maq": "APLICAÇÃO MANUAL", "prod": 0.08, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 9.0, "apont": 0.08, "extra": 0.0, "metros": 364.24, "cap_tot": 0.0}, {"ano": 2026, "mes": 5, "maq": "BATIDA", "prod": 106.2, "prev": 0.0, "corr": 2.25, "setup": 37.72, "outros": 27.13, "disp": 176.0, "apont": 173.3, "extra": 22.95, "metros": 42718.86, "cap_tot": 0.0}, {"ano": 2026, "mes": 5, "maq": "BROTECH CDF330", "prod": 162.68, "prev": 0.0, "corr": 8.0, "setup": 14.38, "outros": 40.68, "disp": 176.0, "apont": 225.75, "extra": 49.82, "metros": 73743.0, "cap_tot": 135450.0}, {"ano": 2026, "mes": 5, "maq": "CORTE E VINCO", "prod": 2.02, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 45.0, "apont": 2.02, "extra": 0.0, "metros": 2621.49, "cap_tot": 0.0}, {"ano": 2026, "mes": 5, "maq": "DOBRADEIRA", "prod": 185.73, "prev": 0.0, "corr": 0.0, "setup": 17.03, "outros": 15.0, "disp": 184.0, "apont": 217.77, "extra": 35.1, "metros": 27191.2, "cap_tot": 0.0}, {"ano": 2026, "mes": 5, "maq": "DURST", "prod": 22.68, "prev": 0.0, "corr": 0.0, "setup": 86.48, "outros": 86.57, "disp": 176.0, "apont": 195.73, "extra": 36.23, "metros": 77926.0, "cap_tot": 293600.0}, {"ano": 2026, "mes": 5, "maq": "EMBALAGEM FINAL", "prod": 0.12, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 108.4, "disp": 176.0, "apont": 108.52, "extra": 1.73, "metros": 266312.9, "cap_tot": 0.0}, {"ano": 2026, "mes": 5, "maq": "ETIRAMA FIT", "prod": 93.0, "prev": 1.18, "corr": 0.0, "setup": 71.98, "outros": 60.17, "disp": 176.0, "apont": 226.33, "extra": 53.68, "metros": 85888.0, "cap_tot": 135800.0}, {"ano": 2026, "mes": 5, "maq": "ETIRAMA ONE", "prod": 93.1, "prev": 0.0, "corr": 0.0, "setup": 64.13, "outros": 66.92, "disp": 176.0, "apont": 224.15, "extra": 49.92, "metros": 113242.02, "cap_tot": 134490.0}, {"ano": 2026, "mes": 5, "maq": "ETIRAMA WINE", "prod": 50.77, "prev": 0.0, "corr": 0.0, "setup": 9.35, "outros": 16.93, "disp": 106.0, "apont": 77.05, "extra": 13.33, "metros": 35951.0, "cap_tot": 38523.46}, {"ano": 2026, "mes": 5, "maq": "FECHAMENTO DE KIT", "prod": 0.0, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 6.28, "disp": 62.0, "apont": 6.28, "extra": 0.0, "metros": 139.7, "cap_tot": 0.0}, {"ano": 2026, "mes": 5, "maq": "FINALIZAÇÃO DE OP (GERENTE)", "prod": 15.43, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 8.97, "disp": 107.0, "apont": 24.4, "extra": 2.1, "metros": 1027.37, "cap_tot": 0.0}, {"ano": 2026, "mes": 5, "maq": "GRAMPEADEIRA", "prod": 6.28, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 8.0, "apont": 6.28, "extra": 0.0, "metros": 0.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 5, "maq": "GUILHOTINA", "prod": 62.1, "prev": 0.0, "corr": 0.0, "setup": 8.55, "outros": 126.1, "disp": 176.0, "apont": 196.75, "extra": 20.75, "metros": 4500.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 5, "maq": "MESA DE REVISÃO 1", "prod": 22.8, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 28.85, "disp": 176.0, "apont": 51.65, "extra": 3.42, "metros": 27153.85, "cap_tot": 0.0}, {"ano": 2026, "mes": 5, "maq": "OFFSET - SPEEDMASTER", "prod": 71.48, "prev": 0.0, "corr": 0.0, "setup": 16.47, "outros": 56.6, "disp": 150.0, "apont": 144.55, "extra": 13.7, "metros": 10.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 5, "maq": "PLOTTER VD330", "prod": 91.43, "prev": 0.0, "corr": 0.0, "setup": 0.5, "outros": 15.47, "disp": 167.0, "apont": 107.4, "extra": 7.3, "metros": 8374.02, "cap_tot": 0.0}, {"ano": 2026, "mes": 5, "maq": "REBOBINADEIRA ECO", "prod": 182.27, "prev": 0.0, "corr": 0.0, "setup": 10.55, "outros": 31.55, "disp": 176.0, "apont": 224.37, "extra": 52.42, "metros": 87375.34, "cap_tot": 0.0}, {"ano": 2026, "mes": 5, "maq": "REVISORA VRR STD 350", "prod": 178.0, "prev": 0.0, "corr": 0.0, "setup": 14.12, "outros": 25.97, "disp": 176.0, "apont": 218.08, "extra": 42.63, "metros": 72742.62, "cap_tot": 0.0}, {"ano": 2026, "mes": 5, "maq": "REVISÃO GERAL", "prod": 10.2, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.27, "disp": 88.0, "apont": 10.47, "extra": 0.0, "metros": 3486.02, "cap_tot": 0.0}, {"ano": 2026, "mes": 5, "maq": "REVISÃO MANUAL", "prod": 70.53, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 3.3, "disp": 175.0, "apont": 73.83, "extra": 1.0, "metros": 2505.91, "cap_tot": 0.0}, {"ano": 2026, "mes": 5, "maq": "SELAGEM MANUAL", "prod": 9.0, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 8.0, "apont": 9.0, "extra": 1.0, "metros": 2000.25, "cap_tot": 0.0}, {"ano": 2026, "mes": 5, "maq": "TERCEIROS", "prod": 20.8, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 106.0, "apont": 20.8, "extra": 0.0, "metros": 896.2, "cap_tot": 0.0}, {"ano": 2026, "mes": 5, "maq": "TROQUELADORA", "prod": 153.02, "prev": 0.0, "corr": 0.0, "setup": 10.03, "outros": 46.7, "disp": 176.0, "apont": 209.75, "extra": 40.6, "metros": 355415.21, "cap_tot": 314625.0}, {"ano": 2026, "mes": 5, "maq": "ZEBRA - TÉRMICA", "prod": 11.03, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 18.0, "apont": 11.03, "extra": 2.03, "metros": 11.9, "cap_tot": 0.0}]};
+const DATA = {"periodo": "Jan 26 – Mai 26", "dias_uteis_periodo": 1730, "atualizado_em": "23/06/2026 14:05", "kpis": {"pct_produtivo": 57.68, "d_pct_produtivo": -0.44, "pct_cap": 107.53, "d_pct_cap": 14.95, "hrs_prod": 7999.27, "d_hrs_prod": 75.45, "hrs_improd": 5868.68, "d_hrs_improd": 4796.82, "cap_total_m": 5411079, "cap_util_m": 5818487, "d_cap_util_pct": 16.16, "pct_setup": 15.18, "d_pct_setup": -2.96, "hrs_extra": 2629.97, "d_hrs_extra": 75.37, "hrs_prev": 19.0, "d_hrs_prev": -1.12, "hrs_corr": 83.38, "d_hrs_corr": -13.25, "hrs_setup": 2105.83, "d_hrs_setup": -58.18, "pct_manut": 0.67, "metros_prod": 5818487, "d_metros_pct": 16.16}, "series": {"labels": ["Jan 26", "Fev 26", "Mar 26", "Abr 26", "Mai 26"], "pct_cap": [108.03, 94.97, 104.77, 107.77, 122.72], "hrs_prod": [1640.48, 1548.57, 1644.13, 1545.32, 1620.77], "hrs_disp": [2735.0, 2916.0, 3375.0, 3034.0, 3169.0], "hrs_apont": [2855.0, 2762.18, 2868.23, 2617.18, 2765.35], "hrs_prev": [4.13, 10.13, 1.25, 2.3, 1.18], "hrs_corr": [9.28, 19.73, 20.62, 23.5, 10.25], "hrs_setup": [418.7, 466.85, 439.5, 419.48, 361.3], "hrs_extra": [775.72, 630.48, 399.7, 374.35, 449.72], "pct_prev": [0.15, 0.35, 0.04, 0.08, 0.04], "pct_corr": [0.34, 0.68, 0.61, 0.77, 0.32], "pct_manut": [0.49, 1.02, 0.65, 0.85, 0.36]}, "por_maquina": [{"nm": "ETIRAMA WINE", "vel": 8, "h": 591.78, "cap_tot": 295879, "cap_real": 286918, "pct_cap": 97}, {"nm": "TROQUELADORA", "vel": 25, "h": 1061.82, "cap_tot": 1592725, "cap_real": 1091003, "pct_cap": 68}, {"nm": "ETIRAMA ONE", "vel": 10, "h": 1168.25, "cap_tot": 700950, "cap_real": 458486, "pct_cap": 65}, {"nm": "BROTECH CDF330", "vel": 10, "h": 1126.47, "cap_tot": 675880, "cap_real": 390607, "pct_cap": 58}, {"nm": "ETIRAMA FIT", "vel": 10, "h": 1073.03, "cap_tot": 643820, "cap_real": 346111, "pct_cap": 54}, {"nm": "DURST", "vel": 25, "h": 1001.2, "cap_tot": 1501800, "cap_real": 397286, "pct_cap": 26}, {"nm": "APLICAÇÃO MANUAL", "vel": 0, "h": 0.08, "cap_tot": 0, "cap_real": 364, "pct_cap": 0}, {"nm": "BATIDA", "vel": 0, "h": 1011.47, "cap_tot": 0, "cap_real": 261953, "pct_cap": 0}, {"nm": "CORTE E VINCO", "vel": 0, "h": 22.83, "cap_tot": 0, "cap_real": 13203, "pct_cap": 0}, {"nm": "DOBRADEIRA", "vel": 0, "h": 1004.68, "cap_tot": 0, "cap_real": 86985, "pct_cap": 0}, {"nm": "DURST - AGUARDANDO PCP", "vel": 25, "h": 0.02, "cap_tot": 25, "cap_real": 0, "pct_cap": 0}, {"nm": "EMBALAGEM FINAL", "vel": 0, "h": 462.02, "cap_tot": 0, "cap_real": 1323220, "pct_cap": 0}, {"nm": "FECHAMENTO DE KIT", "vel": 0, "h": 19.88, "cap_tot": 0, "cap_real": 2535, "pct_cap": 0}, {"nm": "FINALIZAÇÃO DE OP (GERENTE)", "vel": 0, "h": 89.73, "cap_tot": 0, "cap_real": 52188, "pct_cap": 0}, {"nm": "GRAMPEADEIRA", "vel": 0, "h": 42.83, "cap_tot": 0, "cap_real": 0, "pct_cap": 0}, {"nm": "GUILHOTINA", "vel": 0, "h": 1003.83, "cap_tot": 0, "cap_real": 29025, "pct_cap": 0}, {"nm": "MESA DE REVISÃO 1", "vel": 0, "h": 132.2, "cap_tot": 0, "cap_real": 100119, "pct_cap": 0}, {"nm": "MESA DE REVISÃO 2", "vel": 0, "h": 6.0, "cap_tot": 0, "cap_real": 0, "pct_cap": 0}, {"nm": "OFFSET - SPEEDMASTER", "vel": 0, "h": 812.82, "cap_tot": 0, "cap_real": 750, "pct_cap": 0}, {"nm": "PLOTTER VD330", "vel": 0, "h": 538.88, "cap_tot": 0, "cap_real": 39102, "pct_cap": 0}, {"nm": "REBOBINADEIRA ECO", "vel": 0, "h": 1039.5, "cap_tot": 0, "cap_real": 411836, "pct_cap": 0}, {"nm": "REVISORA VRR STD 350", "vel": 0, "h": 1070.93, "cap_tot": 0, "cap_real": 413388, "pct_cap": 0}, {"nm": "REVISÃO DIGITAL", "vel": 0, "h": 4.63, "cap_tot": 0, "cap_real": 632, "pct_cap": 0}, {"nm": "REVISÃO GERAL", "vel": 0, "h": 59.15, "cap_tot": 0, "cap_real": 99566, "pct_cap": 0}, {"nm": "REVISÃO MANUAL", "vel": 0, "h": 453.22, "cap_tot": 0, "cap_real": 8899, "pct_cap": 0}, {"nm": "SELAGEM MANUAL", "vel": 0, "h": 9.0, "cap_tot": 0, "cap_real": 2000, "pct_cap": 0}, {"nm": "TERCEIROS", "vel": 0, "h": 46.98, "cap_tot": 0, "cap_real": 912, "pct_cap": 0}, {"nm": "ZEBRA - TÉRMICA", "vel": 0, "h": 14.7, "cap_tot": 0, "cap_real": 1390, "pct_cap": 0}], "dias_uteis": [{"m": "Jan", "d": 21, "obs": "01/01 Confraternizacao"}, {"m": "Fev", "d": 18, "obs": "Carnaval 16-17/02"}, {"m": "Mar", "d": 22, "obs": "21/03 Aniv. Vinhedo (sab.)"}, {"m": "Abr", "d": 20, "obs": "03/04 Sexta Santa 21/04 Tiradentes"}, {"m": "Mai", "d": 20, "obs": "01/05 Dia do Trabalho"}, {"m": "Jun", "d": 21, "obs": "04/06 Corpus Christi"}, {"m": "Jul", "d": 22, "obs": "09/07 Revolucao SP"}, {"m": "Ago", "d": 21, "obs": "—"}, {"m": "Set", "d": 21, "obs": "07/09 Independencia"}, {"m": "Out", "d": 21, "obs": "12/10 N. Sra. Aparecida"}, {"m": "Nov", "d": 19, "obs": "02/11 Finados 20/11 Consciencia Negra"}, {"m": "Dez", "d": 22, "obs": "25/12 Natal"}], "config_maq": [{"maquina": "Etirama Fit", "vel_ref": 10}, {"maquina": "Etirama One", "vel_ref": 10}, {"maquina": "Etirama Wine", "vel_ref": 8}, {"maquina": "Offset - Speedmaster", "vel_ref": 0}, {"maquina": "Revisora Vrr Std 350", "vel_ref": 0}, {"maquina": "Guilhotina", "vel_ref": 0}, {"maquina": "Brotech Cdf330", "vel_ref": 10}, {"maquina": "Plotter Vd330", "vel_ref": 0}, {"maquina": "Durst", "vel_ref": 25}, {"maquina": "Troqueladora", "vel_ref": 25}], "mensal": [{"ano": 2026, "mes": 1, "maq": "BATIDA", "prod": 134.45, "prev": 0.0, "corr": 0.52, "setup": 54.12, "outros": 47.08, "disp": 167.0, "apont": 236.17, "extra": 73.83, "metros": 60265.04, "cap_tot": 0.0}, {"ano": 2026, "mes": 1, "maq": "BROTECH CDF330", "prod": 159.77, "prev": 0.0, "corr": 2.77, "setup": 24.55, "outros": 44.4, "disp": 167.0, "apont": 231.48, "extra": 65.6, "metros": 76719.02, "cap_tot": 138890.0}, {"ano": 2026, "mes": 1, "maq": "CORTE E VINCO", "prod": 16.63, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 34.0, "apont": 16.63, "extra": 0.0, "metros": 5126.43, "cap_tot": 0.0}, {"ano": 2026, "mes": 1, "maq": "DOBRADEIRA", "prod": 152.45, "prev": 0.0, "corr": 0.0, "setup": 21.22, "outros": 13.0, "disp": 158.0, "apont": 186.67, "extra": 50.07, "metros": 99.07, "cap_tot": 0.0}, {"ano": 2026, "mes": 1, "maq": "DURST", "prod": 54.62, "prev": 0.0, "corr": 1.25, "setup": 69.83, "outros": 53.68, "disp": 149.0, "apont": 179.38, "extra": 55.93, "metros": 71194.02, "cap_tot": 269075.0}, {"ano": 2026, "mes": 1, "maq": "EMBALAGEM FINAL", "prod": 1.33, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 63.27, "disp": 167.0, "apont": 64.6, "extra": 5.95, "metros": 251035.38, "cap_tot": 0.0}, {"ano": 2026, "mes": 1, "maq": "ETIRAMA FIT", "prod": 103.83, "prev": 0.0, "corr": 0.0, "setup": 50.58, "outros": 63.47, "disp": 167.0, "apont": 217.88, "extra": 55.58, "metros": 92185.5, "cap_tot": 130730.0}, {"ano": 2026, "mes": 1, "maq": "ETIRAMA ONE", "prod": 75.72, "prev": 1.3, "corr": 0.0, "setup": 79.98, "outros": 104.0, "disp": 167.0, "apont": 261.0, "extra": 106.62, "metros": 94999.01, "cap_tot": 156600.0}, {"ano": 2026, "mes": 1, "maq": "ETIRAMA WINE", "prod": 121.08, "prev": 0.0, "corr": 0.0, "setup": 19.03, "outros": 53.05, "disp": 141.0, "apont": 193.17, "extra": 78.67, "metros": 91385.0, "cap_tot": 96579.47}, {"ano": 2026, "mes": 1, "maq": "FECHAMENTO DE KIT", "prod": 0.0, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 7.82, "disp": 18.0, "apont": 7.82, "extra": 0.0, "metros": 139.7, "cap_tot": 0.0}, {"ano": 2026, "mes": 1, "maq": "FINALIZAÇÃO DE OP (GERENTE)", "prod": 16.17, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 9.82, "disp": 106.0, "apont": 25.98, "extra": 0.77, "metros": 26703.58, "cap_tot": 0.0}, {"ano": 2026, "mes": 1, "maq": "GRAMPEADEIRA", "prod": 1.5, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 9.0, "apont": 1.5, "extra": 0.0, "metros": 0.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 1, "maq": "GUILHOTINA", "prod": 71.68, "prev": 0.0, "corr": 0.0, "setup": 7.1, "outros": 118.27, "disp": 158.0, "apont": 197.05, "extra": 47.62, "metros": 0.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 1, "maq": "MESA DE REVISÃO 1", "prod": 9.43, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.42, "disp": 88.0, "apont": 9.85, "extra": 0.0, "metros": 6304.38, "cap_tot": 0.0}, {"ano": 2026, "mes": 1, "maq": "MESA DE REVISÃO 2", "prod": 3.0, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 9.0, "apont": 3.0, "extra": 0.0, "metros": 0.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 1, "maq": "OFFSET - SPEEDMASTER", "prod": 89.03, "prev": 2.83, "corr": 2.0, "setup": 27.23, "outros": 40.72, "disp": 141.0, "apont": 161.82, "extra": 33.02, "metros": 270.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 1, "maq": "PLOTTER VD330", "prod": 69.97, "prev": 0.0, "corr": 0.0, "setup": 18.37, "outros": 20.2, "disp": 142.0, "apont": 108.53, "extra": 25.57, "metros": 8317.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 1, "maq": "REBOBINADEIRA ECO", "prod": 166.53, "prev": 0.0, "corr": 0.0, "setup": 11.25, "outros": 20.78, "disp": 141.0, "apont": 198.57, "extra": 60.37, "metros": 94105.94, "cap_tot": 0.0}, {"ano": 2026, "mes": 1, "maq": "REVISORA VRR STD 350", "prod": 170.13, "prev": 0.0, "corr": 2.75, "setup": 22.37, "outros": 21.4, "disp": 167.0, "apont": 216.65, "extra": 58.08, "metros": 95124.39, "cap_tot": 0.0}, {"ano": 2026, "mes": 1, "maq": "REVISÃO GERAL", "prod": 4.45, "prev": 0.0, "corr": 0.0, "setup": 0.17, "outros": 11.4, "disp": 86.0, "apont": 16.02, "extra": 0.02, "metros": 61196.16, "cap_tot": 0.0}, {"ano": 2026, "mes": 1, "maq": "REVISÃO MANUAL", "prod": 82.8, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 19.5, "disp": 150.0, "apont": 102.3, "extra": 11.53, "metros": 0.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 1, "maq": "TERCEIROS", "prod": 5.43, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 36.0, "apont": 5.43, "extra": 0.0, "metros": 0.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 1, "maq": "TROQUELADORA", "prod": 130.47, "prev": 0.0, "corr": 0.0, "setup": 12.9, "outros": 70.13, "disp": 167.0, "apont": 213.5, "extra": 46.5, "metros": 166268.43, "cap_tot": 320250.0}, {"ano": 2026, "mes": 2, "maq": "BATIDA", "prod": 136.15, "prev": 3.63, "corr": 0.0, "setup": 59.75, "outros": 26.68, "disp": 158.0, "apont": 226.22, "extra": 69.8, "metros": 62597.02, "cap_tot": 0.0}, {"ano": 2026, "mes": 2, "maq": "BROTECH CDF330", "prod": 138.15, "prev": 0.0, "corr": 1.02, "setup": 26.15, "outros": 40.73, "disp": 158.0, "apont": 206.05, "extra": 48.05, "metros": 75541.0, "cap_tot": 123630.0}, {"ano": 2026, "mes": 2, "maq": "CORTE E VINCO", "prod": 3.68, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 52.0, "apont": 3.68, "extra": 0.0, "metros": 3459.31, "cap_tot": 0.0}, {"ano": 2026, "mes": 2, "maq": "DOBRADEIRA", "prod": 150.07, "prev": 0.0, "corr": 0.0, "setup": 25.25, "outros": 17.0, "disp": 158.0, "apont": 192.32, "extra": 40.87, "metros": 200.23, "cap_tot": 0.0}, {"ano": 2026, "mes": 2, "maq": "DURST", "prod": 55.57, "prev": 6.5, "corr": 11.97, "setup": 89.38, "outros": 57.85, "disp": 158.0, "apont": 221.27, "extra": 69.28, "metros": 79575.01, "cap_tot": 331900.0}, {"ano": 2026, "mes": 2, "maq": "EMBALAGEM FINAL", "prod": 0.67, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 94.02, "disp": 158.0, "apont": 94.68, "extra": 10.02, "metros": 265032.21, "cap_tot": 0.0}, {"ano": 2026, "mes": 2, "maq": "ETIRAMA FIT", "prod": 41.97, "prev": 0.0, "corr": 0.0, "setup": 87.62, "outros": 66.0, "disp": 158.0, "apont": 195.58, "extra": 37.58, "metros": 37589.1, "cap_tot": 117350.0}, {"ano": 2026, "mes": 2, "maq": "ETIRAMA ONE", "prod": 44.65, "prev": 0.0, "corr": 1.17, "setup": 70.48, "outros": 126.05, "disp": 158.0, "apont": 242.35, "extra": 92.32, "metros": 50348.0, "cap_tot": 145410.0}, {"ano": 2026, "mes": 2, "maq": "ETIRAMA WINE", "prod": 64.25, "prev": 0.0, "corr": 0.0, "setup": 7.9, "outros": 17.02, "disp": 115.0, "apont": 89.17, "extra": 9.42, "metros": 55313.13, "cap_tot": 44581.55}, {"ano": 2026, "mes": 2, "maq": "FECHAMENTO DE KIT", "prod": 0.0, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.82, "disp": 53.0, "apont": 0.82, "extra": 0.0, "metros": 154.25, "cap_tot": 0.0}, {"ano": 2026, "mes": 2, "maq": "FINALIZAÇÃO DE OP (GERENTE)", "prod": 13.08, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 9.48, "disp": 124.0, "apont": 22.57, "extra": 0.0, "metros": 8997.79, "cap_tot": 0.0}, {"ano": 2026, "mes": 2, "maq": "GRAMPEADEIRA", "prod": 2.35, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 17.0, "apont": 2.35, "extra": 0.0, "metros": 0.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 2, "maq": "GUILHOTINA", "prod": 83.78, "prev": 0.0, "corr": 0.0, "setup": 8.05, "outros": 98.97, "disp": 158.0, "apont": 190.8, "extra": 35.48, "metros": 7680.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 2, "maq": "MESA DE REVISÃO 1", "prod": 3.68, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 20.68, "disp": 131.0, "apont": 24.37, "extra": 1.02, "metros": 3326.16, "cap_tot": 0.0}, {"ano": 2026, "mes": 2, "maq": "MESA DE REVISÃO 2", "prod": 3.0, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 9.0, "apont": 3.0, "extra": 0.0, "metros": 0.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 2, "maq": "OFFSET - SPEEDMASTER", "prod": 104.6, "prev": 0.0, "corr": 3.1, "setup": 20.53, "outros": 23.5, "disp": 150.0, "apont": 151.73, "extra": 9.25, "metros": 70.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 2, "maq": "PLOTTER VD330", "prod": 101.03, "prev": 0.0, "corr": 0.0, "setup": 15.02, "outros": 15.22, "disp": 140.0, "apont": 131.27, "extra": 21.47, "metros": 10418.48, "cap_tot": 0.0}, {"ano": 2026, "mes": 2, "maq": "REBOBINADEIRA ECO", "prod": 177.33, "prev": 0.0, "corr": 0.0, "setup": 17.45, "outros": 19.57, "disp": 158.0, "apont": 214.35, "extra": 56.5, "metros": 93213.52, "cap_tot": 0.0}, {"ano": 2026, "mes": 2, "maq": "REVISORA VRR STD 350", "prod": 168.75, "prev": 0.0, "corr": 2.48, "setup": 23.6, "outros": 11.65, "disp": 158.0, "apont": 206.48, "extra": 48.48, "metros": 75682.5, "cap_tot": 0.0}, {"ano": 2026, "mes": 2, "maq": "REVISÃO GERAL", "prod": 17.93, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 3.27, "disp": 123.0, "apont": 21.2, "extra": 1.0, "metros": 21285.75, "cap_tot": 0.0}, {"ano": 2026, "mes": 2, "maq": "REVISÃO MANUAL", "prod": 83.7, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 6.8, "disp": 149.0, "apont": 90.5, "extra": 18.28, "metros": 0.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 2, "maq": "TERCEIROS", "prod": 10.45, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 54.0, "apont": 10.45, "extra": 0.0, "metros": 7.9, "cap_tot": 0.0}, {"ano": 2026, "mes": 2, "maq": "TROQUELADORA", "prod": 141.27, "prev": 0.0, "corr": 0.0, "setup": 15.5, "outros": 61.58, "disp": 158.0, "apont": 218.35, "extra": 61.67, "metros": 183935.72, "cap_tot": 327525.0}, {"ano": 2026, "mes": 2, "maq": "ZEBRA - TÉRMICA", "prod": 2.45, "prev": 0.0, "corr": 0.0, "setup": 0.17, "outros": 0.02, "disp": 61.0, "apont": 2.63, "extra": 0.0, "metros": 1099.99, "cap_tot": 0.0}, {"ano": 2026, "mes": 3, "maq": "BATIDA", "prod": 118.7, "prev": 0.33, "corr": 0.0, "setup": 46.8, "outros": 40.15, "disp": 194.0, "apont": 205.98, "extra": 21.63, "metros": 49515.01, "cap_tot": 0.0}, {"ano": 2026, "mes": 3, "maq": "BROTECH CDF330", "prod": 156.12, "prev": 0.0, "corr": 0.68, "setup": 31.67, "outros": 34.43, "disp": 194.0, "apont": 222.9, "extra": 28.9, "metros": 82465.0, "cap_tot": 133740.0}, {"ano": 2026, "mes": 3, "maq": "CORTE E VINCO", "prod": 0.43, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 17.0, "apont": 0.43, "extra": 0.02, "metros": 1995.03, "cap_tot": 0.0}, {"ano": 2026, "mes": 3, "maq": "DOBRADEIRA", "prod": 180.55, "prev": 0.0, "corr": 0.0, "setup": 18.02, "outros": 17.0, "disp": 186.0, "apont": 215.57, "extra": 46.25, "metros": 39793.57, "cap_tot": 0.0}, {"ano": 2026, "mes": 3, "maq": "DURST", "prod": 51.77, "prev": 0.0, "corr": 2.82, "setup": 102.35, "outros": 64.95, "disp": 194.0, "apont": 221.88, "extra": 33.12, "metros": 82766.02, "cap_tot": 332825.0}, {"ano": 2026, "mes": 3, "maq": "DURST - AGUARDANDO PCP", "prod": 0.02, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 8.0, "apont": 0.02, "extra": 0.0, "metros": 0.01, "cap_tot": 25.0}, {"ano": 2026, "mes": 3, "maq": "EMBALAGEM FINAL", "prod": 0.17, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 106.3, "disp": 194.0, "apont": 106.47, "extra": 0.22, "metros": 258198.26, "cap_tot": 0.0}, {"ano": 2026, "mes": 3, "maq": "ETIRAMA FIT", "prod": 82.92, "prev": 0.0, "corr": 11.55, "setup": 61.47, "outros": 76.13, "disp": 194.0, "apont": 232.07, "extra": 38.07, "metros": 73150.0, "cap_tot": 139240.0}, {"ano": 2026, "mes": 3, "maq": "ETIRAMA ONE", "prod": 99.47, "prev": 0.0, "corr": 1.65, "setup": 71.35, "outros": 65.72, "disp": 194.0, "apont": 238.18, "extra": 46.15, "metros": 78522.0, "cap_tot": 142910.0}, {"ano": 2026, "mes": 3, "maq": "ETIRAMA WINE", "prod": 68.12, "prev": 0.0, "corr": 0.0, "setup": 18.22, "outros": 22.28, "disp": 134.0, "apont": 108.62, "extra": 5.35, "metros": 52318.02, "cap_tot": 54306.16}, {"ano": 2026, "mes": 3, "maq": "FECHAMENTO DE KIT", "prod": 0.0, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 1.72, "disp": 54.0, "apont": 1.72, "extra": 0.0, "metros": 1575.09, "cap_tot": 0.0}, {"ano": 2026, "mes": 3, "maq": "FINALIZAÇÃO DE OP (GERENTE)", "prod": 7.38, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 3.47, "disp": 168.0, "apont": 10.85, "extra": 1.2, "metros": 12198.3, "cap_tot": 0.0}, {"ano": 2026, "mes": 3, "maq": "GRAMPEADEIRA", "prod": 25.0, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 9.0, "apont": 25.0, "extra": 16.0, "metros": 0.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 3, "maq": "GUILHOTINA", "prod": 92.73, "prev": 0.0, "corr": 0.0, "setup": 8.7, "outros": 114.12, "disp": 194.0, "apont": 215.55, "extra": 24.98, "metros": 9275.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 3, "maq": "MESA DE REVISÃO 1", "prod": 7.55, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 20.18, "disp": 160.0, "apont": 27.73, "extra": 6.37, "metros": 19836.67, "cap_tot": 0.0}, {"ano": 2026, "mes": 3, "maq": "OFFSET - SPEEDMASTER", "prod": 123.72, "prev": 0.0, "corr": 0.0, "setup": 21.3, "outros": 26.52, "disp": 168.0, "apont": 171.53, "extra": 22.75, "metros": 100.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 3, "maq": "PLOTTER VD330", "prod": 81.33, "prev": 0.0, "corr": 0.0, "setup": 9.7, "outros": 21.12, "disp": 185.0, "apont": 112.15, "extra": 8.82, "metros": 7458.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 3, "maq": "REBOBINADEIRA ECO", "prod": 156.63, "prev": 0.0, "corr": 0.0, "setup": 13.63, "outros": 24.43, "disp": 194.0, "apont": 194.7, "extra": 17.75, "metros": 70141.33, "cap_tot": 0.0}, {"ano": 2026, "mes": 3, "maq": "REVISORA VRR STD 350", "prod": 162.52, "prev": 0.0, "corr": 3.27, "setup": 24.4, "outros": 32.98, "disp": 194.0, "apont": 223.17, "extra": 29.17, "metros": 72773.75, "cap_tot": 0.0}, {"ano": 2026, "mes": 3, "maq": "REVISÃO DIGITAL", "prod": 0.0, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 4.63, "disp": 9.0, "apont": 4.63, "extra": 0.0, "metros": 632.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 3, "maq": "REVISÃO GERAL", "prod": 2.72, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 7.23, "disp": 97.0, "apont": 9.95, "extra": 1.02, "metros": 12006.87, "cap_tot": 0.0}, {"ano": 2026, "mes": 3, "maq": "REVISÃO MANUAL", "prod": 101.38, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.62, "disp": 151.0, "apont": 102.0, "extra": 31.58, "metros": 4293.32, "cap_tot": 0.0}, {"ano": 2026, "mes": 3, "maq": "TERCEIROS", "prod": 1.88, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 63.0, "apont": 1.88, "extra": 0.0, "metros": 8.29, "cap_tot": 0.0}, {"ano": 2026, "mes": 3, "maq": "TROQUELADORA", "prod": 122.0, "prev": 0.92, "corr": 0.65, "setup": 11.9, "outros": 78.75, "disp": 194.0, "apont": 214.22, "extra": 20.37, "metros": 248729.0, "cap_tot": 321325.0}, {"ano": 2026, "mes": 3, "maq": "ZEBRA - TÉRMICA", "prod": 1.03, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 26.0, "apont": 1.03, "extra": 0.0, "metros": 279.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 4, "maq": "BATIDA", "prod": 103.52, "prev": 0.0, "corr": 0.0, "setup": 39.22, "outros": 27.07, "disp": 177.0, "apont": 169.8, "extra": 12.25, "metros": 46857.34, "cap_tot": 0.0}, {"ano": 2026, "mes": 4, "maq": "BROTECH CDF330", "prod": 168.72, "prev": 0.0, "corr": 16.12, "setup": 24.95, "outros": 30.5, "disp": 177.0, "apont": 240.28, "extra": 63.28, "metros": 82139.0, "cap_tot": 144170.0}, {"ano": 2026, "mes": 4, "maq": "CORTE E VINCO", "prod": 0.07, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 34.0, "apont": 0.07, "extra": 0.0, "metros": 1.55, "cap_tot": 0.0}, {"ano": 2026, "mes": 4, "maq": "DOBRADEIRA", "prod": 162.28, "prev": 0.0, "corr": 0.0, "setup": 13.18, "outros": 16.9, "disp": 168.0, "apont": 192.37, "extra": 29.55, "metros": 19701.46, "cap_tot": 0.0}, {"ano": 2026, "mes": 4, "maq": "DURST", "prod": 27.8, "prev": 2.3, "corr": 0.0, "setup": 92.72, "outros": 60.12, "disp": 168.0, "apont": 182.93, "extra": 23.75, "metros": 85825.01, "cap_tot": 274400.0}, {"ano": 2026, "mes": 4, "maq": "EMBALAGEM FINAL", "prod": 4.98, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 82.77, "disp": 177.0, "apont": 87.75, "extra": 1.47, "metros": 282641.3, "cap_tot": 0.0}, {"ano": 2026, "mes": 4, "maq": "ETIRAMA FIT", "prod": 58.37, "prev": 0.0, "corr": 4.55, "setup": 76.55, "outros": 61.7, "disp": 177.0, "apont": 201.17, "extra": 24.18, "metros": 57299.0, "cap_tot": 120700.0}, {"ano": 2026, "mes": 4, "maq": "ETIRAMA ONE", "prod": 86.83, "prev": 0.0, "corr": 0.0, "setup": 60.02, "outros": 55.72, "disp": 177.0, "apont": 202.57, "extra": 25.57, "metros": 121375.0, "cap_tot": 121540.0}, {"ano": 2026, "mes": 4, "maq": "ETIRAMA WINE", "prod": 56.28, "prev": 0.0, "corr": 0.0, "setup": 24.23, "outros": 43.27, "disp": 132.0, "apont": 123.78, "extra": 13.8, "metros": 51951.0, "cap_tot": 61889.19}, {"ano": 2026, "mes": 4, "maq": "FECHAMENTO DE KIT", "prod": 0.0, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 3.25, "disp": 45.0, "apont": 3.25, "extra": 0.0, "metros": 527.05, "cap_tot": 0.0}, {"ano": 2026, "mes": 4, "maq": "FINALIZAÇÃO DE OP (GERENTE)", "prod": 5.9, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.03, "disp": 150.0, "apont": 5.93, "extra": 1.35, "metros": 3261.67, "cap_tot": 0.0}, {"ano": 2026, "mes": 4, "maq": "GRAMPEADEIRA", "prod": 7.7, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 9.0, "apont": 7.7, "extra": 3.7, "metros": 0.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 4, "maq": "GUILHOTINA", "prod": 99.07, "prev": 0.0, "corr": 0.0, "setup": 11.42, "outros": 93.2, "disp": 177.0, "apont": 203.68, "extra": 28.15, "metros": 7570.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 4, "maq": "MESA DE REVISÃO 1", "prod": 15.38, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 3.22, "disp": 141.0, "apont": 18.6, "extra": 2.0, "metros": 43498.86, "cap_tot": 0.0}, {"ano": 2026, "mes": 4, "maq": "OFFSET - SPEEDMASTER", "prod": 118.88, "prev": 0.0, "corr": 1.5, "setup": 29.9, "outros": 32.9, "disp": 168.0, "apont": 183.18, "extra": 24.47, "metros": 300.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 4, "maq": "PLOTTER VD330", "prod": 71.0, "prev": 0.0, "corr": 0.0, "setup": 2.97, "outros": 5.57, "disp": 160.0, "apont": 79.53, "extra": 11.42, "metros": 4535.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 4, "maq": "REBOBINADEIRA ECO", "prod": 168.65, "prev": 0.0, "corr": 0.0, "setup": 11.5, "outros": 27.37, "disp": 177.0, "apont": 207.52, "extra": 38.25, "metros": 67000.31, "cap_tot": 0.0}, {"ano": 2026, "mes": 4, "maq": "REVISORA VRR STD 350", "prod": 167.37, "prev": 0.0, "corr": 0.0, "setup": 21.63, "outros": 17.55, "disp": 177.0, "apont": 206.55, "extra": 31.2, "metros": 97065.15, "cap_tot": 0.0}, {"ano": 2026, "mes": 4, "maq": "REVISÃO GERAL", "prod": 0.1, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 1.42, "disp": 80.0, "apont": 1.52, "extra": 0.0, "metros": 1592.08, "cap_tot": 0.0}, {"ano": 2026, "mes": 4, "maq": "REVISÃO MANUAL", "prod": 84.58, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 159.0, "apont": 84.58, "extra": 10.97, "metros": 2100.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 4, "maq": "TERCEIROS", "prod": 8.42, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 27.0, "apont": 8.42, "extra": 0.0, "metros": 0.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 4, "maq": "TROQUELADORA", "prod": 129.42, "prev": 0.0, "corr": 1.33, "setup": 11.2, "outros": 64.05, "disp": 177.0, "apont": 206.0, "extra": 29.0, "metros": 136654.87, "cap_tot": 309000.0}, {"ano": 2026, "mes": 5, "maq": "APLICAÇÃO MANUAL", "prod": 0.08, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 9.0, "apont": 0.08, "extra": 0.0, "metros": 364.24, "cap_tot": 0.0}, {"ano": 2026, "mes": 5, "maq": "BATIDA", "prod": 106.2, "prev": 0.0, "corr": 2.25, "setup": 37.72, "outros": 27.13, "disp": 176.0, "apont": 173.3, "extra": 22.95, "metros": 42718.86, "cap_tot": 0.0}, {"ano": 2026, "mes": 5, "maq": "BROTECH CDF330", "prod": 162.68, "prev": 0.0, "corr": 8.0, "setup": 14.38, "outros": 40.68, "disp": 176.0, "apont": 225.75, "extra": 49.82, "metros": 73743.0, "cap_tot": 135450.0}, {"ano": 2026, "mes": 5, "maq": "CORTE E VINCO", "prod": 2.02, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 45.0, "apont": 2.02, "extra": 0.0, "metros": 2621.49, "cap_tot": 0.0}, {"ano": 2026, "mes": 5, "maq": "DOBRADEIRA", "prod": 185.73, "prev": 0.0, "corr": 0.0, "setup": 17.03, "outros": 15.0, "disp": 184.0, "apont": 217.77, "extra": 35.1, "metros": 27191.2, "cap_tot": 0.0}, {"ano": 2026, "mes": 5, "maq": "DURST", "prod": 22.68, "prev": 0.0, "corr": 0.0, "setup": 86.48, "outros": 86.57, "disp": 176.0, "apont": 195.73, "extra": 36.23, "metros": 77926.0, "cap_tot": 293600.0}, {"ano": 2026, "mes": 5, "maq": "EMBALAGEM FINAL", "prod": 0.12, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 108.4, "disp": 176.0, "apont": 108.52, "extra": 1.73, "metros": 266312.9, "cap_tot": 0.0}, {"ano": 2026, "mes": 5, "maq": "ETIRAMA FIT", "prod": 93.0, "prev": 1.18, "corr": 0.0, "setup": 71.98, "outros": 60.17, "disp": 176.0, "apont": 226.33, "extra": 53.68, "metros": 85888.0, "cap_tot": 135800.0}, {"ano": 2026, "mes": 5, "maq": "ETIRAMA ONE", "prod": 93.1, "prev": 0.0, "corr": 0.0, "setup": 64.13, "outros": 66.92, "disp": 176.0, "apont": 224.15, "extra": 49.92, "metros": 113242.02, "cap_tot": 134490.0}, {"ano": 2026, "mes": 5, "maq": "ETIRAMA WINE", "prod": 50.77, "prev": 0.0, "corr": 0.0, "setup": 9.35, "outros": 16.93, "disp": 106.0, "apont": 77.05, "extra": 13.33, "metros": 35951.0, "cap_tot": 38523.46}, {"ano": 2026, "mes": 5, "maq": "FECHAMENTO DE KIT", "prod": 0.0, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 6.28, "disp": 62.0, "apont": 6.28, "extra": 0.0, "metros": 139.7, "cap_tot": 0.0}, {"ano": 2026, "mes": 5, "maq": "FINALIZAÇÃO DE OP (GERENTE)", "prod": 15.43, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 8.97, "disp": 107.0, "apont": 24.4, "extra": 2.1, "metros": 1027.37, "cap_tot": 0.0}, {"ano": 2026, "mes": 5, "maq": "GRAMPEADEIRA", "prod": 6.28, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 8.0, "apont": 6.28, "extra": 0.0, "metros": 0.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 5, "maq": "GUILHOTINA", "prod": 62.1, "prev": 0.0, "corr": 0.0, "setup": 8.55, "outros": 126.1, "disp": 176.0, "apont": 196.75, "extra": 20.75, "metros": 4500.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 5, "maq": "MESA DE REVISÃO 1", "prod": 22.8, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 28.85, "disp": 176.0, "apont": 51.65, "extra": 3.42, "metros": 27153.85, "cap_tot": 0.0}, {"ano": 2026, "mes": 5, "maq": "OFFSET - SPEEDMASTER", "prod": 71.48, "prev": 0.0, "corr": 0.0, "setup": 16.47, "outros": 56.6, "disp": 150.0, "apont": 144.55, "extra": 13.7, "metros": 10.0, "cap_tot": 0.0}, {"ano": 2026, "mes": 5, "maq": "PLOTTER VD330", "prod": 91.43, "prev": 0.0, "corr": 0.0, "setup": 0.5, "outros": 15.47, "disp": 167.0, "apont": 107.4, "extra": 7.3, "metros": 8374.02, "cap_tot": 0.0}, {"ano": 2026, "mes": 5, "maq": "REBOBINADEIRA ECO", "prod": 182.27, "prev": 0.0, "corr": 0.0, "setup": 10.55, "outros": 31.55, "disp": 176.0, "apont": 224.37, "extra": 52.42, "metros": 87375.34, "cap_tot": 0.0}, {"ano": 2026, "mes": 5, "maq": "REVISORA VRR STD 350", "prod": 178.0, "prev": 0.0, "corr": 0.0, "setup": 14.12, "outros": 25.97, "disp": 176.0, "apont": 218.08, "extra": 42.63, "metros": 72742.62, "cap_tot": 0.0}, {"ano": 2026, "mes": 5, "maq": "REVISÃO GERAL", "prod": 10.2, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.27, "disp": 88.0, "apont": 10.47, "extra": 0.0, "metros": 3486.02, "cap_tot": 0.0}, {"ano": 2026, "mes": 5, "maq": "REVISÃO MANUAL", "prod": 70.53, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 3.3, "disp": 175.0, "apont": 73.83, "extra": 1.0, "metros": 2505.91, "cap_tot": 0.0}, {"ano": 2026, "mes": 5, "maq": "SELAGEM MANUAL", "prod": 9.0, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 8.0, "apont": 9.0, "extra": 1.0, "metros": 2000.25, "cap_tot": 0.0}, {"ano": 2026, "mes": 5, "maq": "TERCEIROS", "prod": 20.8, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 106.0, "apont": 20.8, "extra": 0.0, "metros": 896.2, "cap_tot": 0.0}, {"ano": 2026, "mes": 5, "maq": "TROQUELADORA", "prod": 153.02, "prev": 0.0, "corr": 0.0, "setup": 10.03, "outros": 46.7, "disp": 176.0, "apont": 209.75, "extra": 40.6, "metros": 355415.21, "cap_tot": 314625.0}, {"ano": 2026, "mes": 5, "maq": "ZEBRA - TÉRMICA", "prod": 11.03, "prev": 0.0, "corr": 0.0, "setup": 0.0, "outros": 0.0, "disp": 18.0, "apont": 11.03, "extra": 2.03, "metros": 11.9, "cap_tot": 0.0}]};
 
 const MESES_PT = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
 
-/* Snapshot inicial para reset */
-const _SNAP = {
-  kpis:        JSON.parse(JSON.stringify(DATA.kpis)),
-  series:      JSON.parse(JSON.stringify(DATA.series)),
-  por_maquina: JSON.parse(JSON.stringify(DATA.por_maquina)),
-  periodo:     DATA.periodo,
-};
+/* Snapshot inicial será criado APÓS a primeira computação completa client-side
+   (garante que todos os campos novos — pct_util, vel_efetiva, MTBF, MTTR, etc. — estejam presentes) */
+let _SNAP = null;
 
 /* ═══════ HELPERS ═══════ */
 const fmtM = n => n>=1e6?(n/1e6).toFixed(2).replace('.',',')+'M m':
@@ -416,13 +460,38 @@ function computeView(records) {
     pct_prev: ms.map(m=>m.disp>0?+((m.prev/m.disp*100).toFixed(2)):0),
     pct_corr: ms.map(m=>m.disp>0?+((m.corr/m.disp*100).toFixed(2)):0),
     pct_manut:ms.map(m=>m.disp>0?+(((m.prev+m.corr)/m.disp*100).toFixed(2)):0),
+    // Novas séries para % Utilização e Disponibilidade (sem manutenção)
+    pct_util: ms.map(m=>m.disp>0?+((m.apont/m.disp*100).toFixed(2)):0),
+    pct_disp_sem_manut: ms.map(m=>m.disp>0?+(((m.disp-m.prev-m.corr)/m.disp*100).toFixed(2)):0),
+    hrs_disp_sem_manut: ms.map(m=>+Math.max(0,m.disp-m.prev-m.corr).toFixed(2)),
   };
+  // Série multi-linha: % utilização por (máquina × mês) — identifica ociosidade
+  const mmKey = (a,m)=>a*100+m;
+  const utilByMaq = {};
+  records.forEach(r=>{
+    if(!utilByMaq[r.maq]) utilByMaq[r.maq] = {};
+    const k = mmKey(r.ano,r.mes);
+    if(!utilByMaq[r.maq][k]) utilByMaq[r.maq][k] = {apont:0,disp:0};
+    utilByMaq[r.maq][k].apont += r.apont;
+    utilByMaq[r.maq][k].disp  += r.disp;
+  });
+  const labelKeys = ms.map(m=>mmKey(m.ano,m.mes));
+  series.util_maq = Object.entries(utilByMaq).map(([nm,bk])=>({
+    nm,
+    data: labelKeys.map(k=>{
+      const v = bk[k]; if(!v||v.disp<=0) return null;
+      return +((v.apont/v.disp*100).toFixed(1));
+    })
+  }));
   const tot=records.reduce((a,r)=>{
     a.prod+=r.prod;a.prev+=r.prev;a.corr+=r.corr;a.setup+=r.setup;
     a.outros+=r.outros;a.disp+=r.disp;a.apont+=r.apont;a.extra+=r.extra;
     a.metros+=r.metros;a.cap_tot+=r.cap_tot;return a;
   },{prod:0,prev:0,corr:0,setup:0,outros:0,disp:0,apont:0,extra:0,metros:0,cap_tot:0});
   const ta=tot.apont,imp=ta-tot.prod;
+  // Proxy de falhas: cada (máquina × mês) com corretiva > 0 representa um evento de falha
+  // (única granularidade disponível client-side; melhor aproximação sem dados de evento)
+  const nFalhas = records.filter(r=>r.corr>0).length;
   const kpis={
     pct_produtivo:ta>0?+((tot.prod/ta*100).toFixed(2)):0,
     pct_cap:tot.cap_tot>0?+((tot.metros/tot.cap_tot*100).toFixed(2)):0,
@@ -432,10 +501,25 @@ function computeView(records) {
     pct_setup:ta>0?+((tot.setup/ta*100).toFixed(2)):0,
     hrs_extra:+tot.extra.toFixed(2),hrs_prev:+tot.prev.toFixed(2),
     hrs_corr:+tot.corr.toFixed(2),hrs_setup:+tot.setup.toFixed(2),
+    hrs_outros:+tot.outros.toFixed(2),
     pct_manut:tot.disp>0?+(((tot.prev+tot.corr)/tot.disp*100).toFixed(2)):0,
+    // Novo: total de horas disponíveis no período (jornada × dias úteis)
+    hrs_disp:+tot.disp.toFixed(2),
+    // Novo: % Utilização = h. apontadas / h. disponíveis
+    pct_util:tot.disp>0?+((tot.apont/tot.disp*100).toFixed(2)):0,
+    // Novo: Velocidade média efetiva = metros / horas apontadas
+    vel_efetiva:tot.apont>0?+((tot.metros/tot.apont/60).toFixed(2)):0,
+    // Novo: H. disponíveis sem manutenção e % disponibilidade
+    hrs_sem_manut:+Math.max(0,tot.disp-tot.prev-tot.corr).toFixed(2),
+    pct_disp_sem_manut:tot.disp>0?+(((tot.disp-tot.prev-tot.corr)/tot.disp*100).toFixed(2)):0,
+    // Novo: MTBF (h. produtivas por falha) e MTTR (h. corretivas por falha)
+    mtbf: nFalhas>0?+((tot.prod/nFalhas).toFixed(2)):0,
+    mttr: nFalhas>0?+((tot.corr/nFalhas).toFixed(2)):0,
+    n_falhas: nFalhas,
     d_pct_produtivo:0,d_pct_cap:0,d_hrs_prod:0,d_hrs_improd:0,
     d_cap_util_pct:0,d_pct_setup:0,d_hrs_extra:0,
     d_hrs_prev:0,d_hrs_corr:0,d_hrs_setup:0,d_metros_pct:0,
+    d_pct_util:0,
   };
   if(ms.length>=2){
     const c=ms[ms.length-1],a=ms[ms.length-2],taC=c.apont,taA=a.apont;
@@ -450,6 +534,8 @@ function computeView(records) {
     kpis.d_hrs_corr=+(c.corr-a.corr).toFixed(2);
     kpis.d_hrs_setup=+(c.setup-a.setup).toFixed(2);
     kpis.d_metros_pct=a.metros>0?+((c.metros-a.metros)/a.metros*100).toFixed(2):0;
+    // Delta % utilização (mês corrente vs anterior)
+    kpis.d_pct_util=+((c.disp>0?c.apont/c.disp*100:0)-(a.disp>0?a.apont/a.disp*100:0)).toFixed(2);
   }
   const velMap={};DATA.por_maquina.forEach(m=>velMap[m.nm]=m.vel);
   const maqMap={};
@@ -497,16 +583,27 @@ function fillKPIs(){
   document.getElementById('pr-d-hrs-setup').innerHTML=delta(K.d_hrs_setup,'h',true);
   document.getElementById('pr-hrs-extra').innerHTML =fmtH(K.hrs_extra);
   document.getElementById('pr-d-hrs-extra').innerHTML=delta(K.d_hrs_extra,'h',true);
+  // Novos KPIs Produtividade
+  document.getElementById('pr-hrs-disp').innerHTML  =fmtH(K.hrs_disp);
+  document.getElementById('pr-pct-util').innerHTML  =fmtP(K.pct_util);
+  document.getElementById('pr-d-pct-util').innerHTML=delta(K.d_pct_util,'%');
   document.getElementById('cp-pct-cap').innerHTML   =fmtP(K.pct_cap);
   document.getElementById('cp-d-pct-cap').innerHTML =delta(K.d_pct_cap,'%');
   document.getElementById('cp-cap-tot').innerHTML   =fmtM(K.cap_total_m);
   document.getElementById('cp-cap-util').innerHTML  =fmtM(K.cap_util_m);
   document.getElementById('cp-d-cap-util').innerHTML=delta(K.d_cap_util_pct,'%');
+  // Novo KPI Capabilidade: Vel. Efetiva (m/min)
+  document.getElementById('cp-vel-ef').innerHTML    =(+K.vel_efetiva).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+'<span class="u"> m/min</span>';
   document.getElementById('mn-hrs-prev').innerHTML  =fmtH(K.hrs_prev);
   document.getElementById('mn-d-hrs-prev').innerHTML=delta(K.d_hrs_prev,'h',true);
   document.getElementById('mn-hrs-corr').innerHTML  =fmtH(K.hrs_corr);
   document.getElementById('mn-d-hrs-corr').innerHTML=delta(K.d_hrs_corr,'h',true);
   document.getElementById('mn-pct-manut').innerHTML =fmtP(K.pct_manut);
+  // Novos KPIs Manutenção: MTBF / MTTR / H. sem manutenção
+  document.getElementById('mn-mtbf').innerHTML      =fmtH(K.mtbf);
+  document.getElementById('mn-mttr').innerHTML      =fmtH(K.mttr);
+  document.getElementById('mn-hrs-sem').innerHTML   =fmtH(K.hrs_sem_manut);
+  document.getElementById('mn-d-pct-disp').innerHTML=`<span class="ne">${(+K.pct_disp_sem_manut).toFixed(1).replace('.',',')}% disp.</span><span class="vs">no período</span>`;
   document.getElementById('pgSub').textContent=DATA.periodo+' · todas as máquinas';
   document.getElementById('atualizado').textContent='atualizado '+DATA.atualizado_em;
 }
@@ -564,7 +661,14 @@ function initPage(pg){
         plugins:{legend:{display:false},tooltip:{...TIP,callbacks:{label:c=>` ${c.parsed.y.toLocaleString('pt-BR')}h`}}},
         scales:SCBASE}});
     const K=DATA.kpis;
-    const pvi=[{nome:'H. Produtivas',v:K.hrs_prod,c:'#066AAB'},{nome:'H. Improdutivas',v:K.hrs_improd,c:'#CBD5E1'}];
+    // Pizza expandida: Produtivas + Setup + Manutenção + Outros + H. Extras
+    const pvi=[
+      {nome:'H. Produtivas', v:K.hrs_prod,                       c:'#066AAB'},
+      {nome:'Setup',         v:K.hrs_setup,                      c:'#3B82F6'},
+      {nome:'Manutenção',    v:(K.hrs_prev||0)+(K.hrs_corr||0),  c:'#93C5FD'},
+      {nome:'Outros Improd.',v:K.hrs_outros||0,                  c:'#CBD5E1'},
+      {nome:'H. Extras',     v:K.hrs_extra,                      c:'#1E293B'},
+    ].filter(p=>p.v>0);
     const totPvi=pvi.reduce((s,p)=>s+p.v,0);
     document.getElementById('pr-donut-total').textContent=totPvi.toLocaleString('pt-BR')+'h';
     mkChart('pr-donut',{type:'doughnut',
@@ -588,6 +692,23 @@ function initPage(pg){
       options:{responsive:true,maintainAspectRatio:false,
         plugins:{legend:{display:false},tooltip:{...TIP,callbacks:{label:c=>[` ${c.parsed.y}h`,c.parsed.y>=60?' acima de 60h':'']}}},
         scales:SCBASE}});
+    // Novo gráfico: % Utilização Máquina × Mês (multi-linha, uma série por máquina)
+    const palette=['#066AAB','#3B82F6','#93C5FD','#10B981','#F59E0B','#EF4444','#8B5CF6','#06B6D4','#84CC16','#EC4899','#0EA5E9','#14B8A6'];
+    const utilDs=(S.util_maq||[]).map((m,i)=>({
+      label:m.nm, data:m.data,
+      borderColor:palette[i%palette.length],
+      backgroundColor:'transparent',
+      tension:.32, borderWidth:2,
+      pointRadius:3, pointBackgroundColor:palette[i%palette.length],
+      pointBorderColor:'#fff', pointBorderWidth:1.5,
+      spanGaps:true,
+    }));
+    mkChart('pr-util',{type:'line',
+      data:{labels:S.labels,datasets:utilDs},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{...LEGBOT,labels:{...LEGBOT.labels,boxWidth:8,padding:10}},
+                 tooltip:{...TIP,callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.y==null?'—':c.parsed.y.toFixed(1)+'%'}`}}},
+        scales:SCPCT}});
   }
 
   if(pg==='capabilidade'){
@@ -640,6 +761,21 @@ function initPage(pg){
       options:{responsive:true,maintainAspectRatio:false,
         plugins:{legend:LEGBOT,tooltip:{...TIP,callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.y.toFixed(2)}%`}}},
         scales:SCPCT2}});
+    // Novo: % disponibilidade da máquina (linha) - escala 0-100
+    mkChart('mn-disp-pct',{type:'line',
+      data:{labels:S.labels,datasets:[{label:'% Disponibilidade',data:S.pct_disp_sem_manut,
+        borderColor:'#10B981',backgroundColor:'rgba(16,185,129,.08)',fill:true,
+        tension:.38,borderWidth:2.5,pointRadius:4.5,pointBackgroundColor:'#10B981',pointBorderColor:'#fff',pointBorderWidth:2}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{...TIP,callbacks:{label:c=>` ${c.parsed.y.toFixed(1)}%`}}},
+        scales:{x:SCPCT.x,y:{...SCPCT.y,suggestedMin:0,suggestedMax:100}}}});
+    // Novo: horas absolutas disponíveis sem manutenção (barras)
+    mkChart('mn-disp-h',{type:'bar',
+      data:{labels:S.labels,datasets:[{label:'H. sem Manutenção',data:S.hrs_disp_sem_manut,
+        backgroundColor:'#10B981',borderRadius:6,barPercentage:.6}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{...TIP,callbacks:{label:c=>` ${c.parsed.y.toLocaleString('pt-BR')}h`}}},
+        scales:SCBASE}});
   }
 
   if(pg==='config'){
@@ -678,17 +814,25 @@ document.querySelectorAll('.sb-i[data-page]').forEach(el=>{
 
 /* ═══════ FILTROS ═══════ */
 function filterMensal(){
-  const de=document.getElementById('f-de').value;
-  const ate=document.getElementById('f-ate').value;
-  const maq=document.getElementById('f-maq').value;
+  const de  = document.getElementById('f-de').value;
+  const ate = document.getElementById('f-ate').value;
+  const maq = document.getElementById('f-maq').value;
+  const mes = document.getElementById('f-mes').value; // "YYYY-MM" (mutuamente exclusivo com de/ate)
   // Parse manual (evita bug de timezone com new Date())
   const parseYM = s => { const [y,m] = s.split('-').map(Number); return y*100+m; };
+  // Mês específico tem precedência - quando preenchido ignora período
+  let mesYM = null;
+  if (mes) { const [y,m] = mes.split('-').map(Number); mesYM = y*100+m; }
   const deYM  = de  ? parseYM(de)  : null;
   const ateYM = ate ? parseYM(ate) : null;
   return (DATA.mensal||[]).filter(r=>{
     const rYM=r.ano*100+r.mes;
-    if(deYM  !== null && rYM < deYM ) return false;
-    if(ateYM !== null && rYM > ateYM) return false;
+    if(mesYM !== null){
+      if(rYM !== mesYM) return false;
+    } else {
+      if(deYM  !== null && rYM < deYM ) return false;
+      if(ateYM !== null && rYM > ateYM) return false;
+    }
     if(maq && r.maq !== maq) return false;
     return true;
   });
@@ -702,7 +846,12 @@ function rebuildCharts(){
 
 function applyFilter(){
   const filtered=filterMensal();
-  if(!filtered.length){alert('Nenhum dado no período / máquina selecionada.');return;}
+  // Auto-apply silencioso: se nada selecionado, mantém visão; mostra aviso só ao limpar manualmente seria intrusivo
+  if(!filtered.length){
+    // Sinaliza visualmente via subtítulo, sem bloquear o usuário
+    document.getElementById('pgSub').textContent='— sem dados para a seleção atual';
+    return;
+  }
   const v=computeView(filtered);
   DATA.kpis=v.kpis;DATA.series=v.series;DATA.por_maquina=v.por_maquina;DATA.periodo=v.periodo;
   fillKPIs();
@@ -715,6 +864,7 @@ function resetFilter(){
   DATA.por_maquina=JSON.parse(JSON.stringify(_SNAP.por_maquina));
   DATA.periodo=_SNAP.periodo;
   document.getElementById('f-maq').value='';
+  document.getElementById('f-mes').value=''; // limpa também o filtro de mês
   setDefaultDates();
   fillKPIs();
   rebuildCharts();
@@ -727,6 +877,21 @@ function populateMaqSelect(){
   mqs.forEach(m=>{const o=document.createElement('option');o.value=m;o.textContent=m;sel.appendChild(o);});
 }
 
+// Novo: popular select de Mês com os meses disponíveis em DATA.mensal
+function populateMesSelect(){
+  const sel=document.getElementById('f-mes');
+  const set=new Set();
+  (DATA.mensal||[]).forEach(r=>set.add(r.ano*100+r.mes));
+  const arr=[...set].sort((a,b)=>a-b);
+  arr.forEach(k=>{
+    const y=Math.floor(k/100), m=k%100;
+    const o=document.createElement('option');
+    o.value=`${y}-${String(m).padStart(2,'0')}`;
+    o.textContent=`${MESES_PT[m-1]}/${y}`;
+    sel.appendChild(o);
+  });
+}
+
 function setDefaultDates(){
   const mn=DATA.mensal||[];if(!mn.length)return;
   const s=[...mn].sort((a,b)=>(a.ano*100+a.mes)-(b.ano*100+b.mes));
@@ -736,11 +901,43 @@ function setDefaultDates(){
   document.getElementById('f-ate').value=`${l.ano}-${String(l.mes).padStart(2,'0')}-${String(ld).padStart(2,'0')}`;
 }
 
-fillKPIs();
 populateMaqSelect();
+populateMesSelect();
 setDefaultDates();
+// Recomputa client-side para garantir que campos novos (MTBF/MTTR/Vel.Efetiva/etc.) existam
+{
+  const v=computeView(DATA.mensal||[]);
+  DATA.kpis=v.kpis;DATA.series=v.series;DATA.por_maquina=v.por_maquina;DATA.periodo=v.periodo;
+}
+// Snapshot inicial — feito após a recomputação para incluir os campos novos
+_SNAP={
+  kpis:JSON.parse(JSON.stringify(DATA.kpis)),
+  series:JSON.parse(JSON.stringify(DATA.series)),
+  por_maquina:JSON.parse(JSON.stringify(DATA.por_maquina)),
+  periodo:DATA.periodo,
+};
+fillKPIs();
 initPage('overview');
-document.getElementById('btn-aplicar').addEventListener('click',applyFilter);
+
+// ═══ Auto-apply on-change + limpeza mútua entre Mês e Período ═══
+const _fDe=document.getElementById('f-de');
+const _fAte=document.getElementById('f-ate');
+const _fMes=document.getElementById('f-mes');
+const _fMaq=document.getElementById('f-maq');
+
+// Regra crítica: preencher Mês limpa De/Até (e vice-versa)
+function _onMesChange(){
+  if(_fMes.value){ _fDe.value=''; _fAte.value=''; }
+  applyFilter();
+}
+function _onPeriodoChange(){
+  if(_fDe.value || _fAte.value){ _fMes.value=''; }
+  applyFilter();
+}
+_fMes.addEventListener('change', _onMesChange);
+_fDe.addEventListener('change',  _onPeriodoChange);
+_fAte.addEventListener('change', _onPeriodoChange);
+_fMaq.addEventListener('change', applyFilter);
 document.getElementById('btn-limpar').addEventListener('click',resetFilter);
 
 /* ─── hamburger (mobile only) ─── */
